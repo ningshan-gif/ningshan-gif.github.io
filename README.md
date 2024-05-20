@@ -1,6 +1,6 @@
 # Hilton – super simple portfolio theme for Jekyll
 
-The Hilton theme is designed to give you the opportunity to present your works in the most creative and dignified way possible. The theme is very easy to customize and has such necessary sections as Works, Testimonials, Blog, and also has a light and dark mode for easy reading. The theme design is ideal for creative people who appreciate simplicity and functionality.
+The Hilton theme is designed to give you the opportunity to present your works in the most creative and dignified way possible. The theme is very easy to customize and has such necessary sections as Works, Testimonials, Blog, and also has a light and dark mode for easy reading. The theme design is ideal for creative people who appreciate simplicity and functionality. 
 
 * * *
 
