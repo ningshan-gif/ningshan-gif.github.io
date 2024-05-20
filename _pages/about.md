@@ -2,7 +2,7 @@
 layout: page
 title: About
 permalink: /about/
-image: '/images/head-2.jpg'
+image: '/images/head-2.JPG'
 ---
 
 About me, name is Ningshan Ma, born and raised in Shenzhen, China. Went to New Hampshire for high school, graduated MIT majoring in computer science in 2024.
@@ -22,6 +22,6 @@ Do these describe me enough? or are they just aliases for my label in the world.
 <div class="gallery-box">
   <div class="gallery">
     <img src="/images/senior_portrait.jpg" loading="lazy">
-    <img src="/images/vertical2.jpg" loading="lazy">
+    <img src="/images/vertical2.JPG" loading="lazy">
   </div>
 </div>
