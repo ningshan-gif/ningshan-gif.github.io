@@ -1,27 +1,12 @@
 ---
 layout: post
-title:  Life shrinks or expands in proportion to one’s courage
-description: Bring to the table win-win survival strategies to ensure proactive domination. At the end of the day, going forward, a new normal that. Capitalize on low hanging fruit to identify a ballpark value activity to beta test. Override the digital divide with additional.
+title:  frangipani flowers
+description: about flowers and lost memory and love
 date:   2020-11-08 15:01:35 +0300
 image:  '/images/07.jpg'
 tags:   [notes, technology, lifestyle]
 ---
 
-In qua quid est boni praeter summam voluptatem, et eam sempiternam? Cur post Tarentum ad Archytam? Qua ex cognitione facilior facta est investigatio rerumano occultissimarum. Negat enim tenuissimo victu, id est contemptissimis escis et sed potionibus, minorem voluptatem. Ego quoque, inquit, didicerim libentius si quiduse.
+jo malone has stopped manufacturing the frangipani flower smell cologne. i went online and ordered off a very strange website a few weeks ago and today it had arrived, i had even forgotten what i ordered when I saw that the package came from ukraine. the bottle has a yellow tint to it, clearly indicating aged existence, an item that has some shared some years on Earth with me. i immediately fell in love with it.
 
-Podcasting operational change management inside of workflows to establish a framework. Taking seamless key performance indicators offline to maximise the long tail. Keeping your eye on the ball while performing a deep dive on the start-up mentality to derive convergence on cross-platform integration.
-
-<div class="gallery-box">
-  <div class="gallery">
-    <img src="/images/07-1.jpg" loading="lazy" alt="House">
-  </div>
-  <em>Photo by <a href="https://unsplash.com/photos/SkwcQ4d_9kg" target="_blank">Yoav Aziz</a> on <a href="https://unsplash.com/" target="_blank">Unsplash</a></em>
-</div>
-
-Capitalize on low hanging fruit to identify a ballpark value added activity to beta test. Override the digital divide with additional clickthroughs from DevOps. Nanotechnology immersion along the information highway will close the loop on focusing solely on the bottom line. Collaboratively administrate turnkey channels whereas virtual e-tailers. Objectively seize scalable metrics whereas proactive e-services. Seamlessly empower fully researched growth strategies and interoperable internal or “organic” sources.
-
-> The longer I live, the more I realize that I am never wrong about anything, and that all the pains I have so humbly taken to verify my notions have only wasted my time!
-
-Leverage agile frameworks to provide a robust synopsis for high level overviews. Iterative approaches to corporate strategy foster collaborative thinking to further the overall value proposition. Organically grow the holistic world view of disruptive innovation via workplace diversity and empowerment.
-
-Completely synergize resource taxing relationships via premier niche markets. Professionally cultivate one-to-one customer service with robust ideas. Dynamically innovate resource-leveling customer service for state of the art customer service.
+i don’t think i’ve ever smelled real frangipani flower, nor identified one in the wild, i only like the white pedal ones, with a bright yellow heart, and somehow the smell takes me back, back ages before I was born. It’s not one of those other floral smells like rose, lavender jasmine that gets overly commercialized to dissolve any personal attachment, and those that are popular always throughout time that lost their tie to a specific time or world. they smell like modern world to me and i don’t like that. the smell of frangipani flower is old and reminds me of old times, a good time where one can take the whole life to love just one person, maybe even multiple lives. I think it’s an age before I was born. somehow i think that’s where i belong too. if it had ever existed, i think i would be in the ancient times, where one person was enough to love and sustain the slow life with not much distraction of fame and too many shiny things and people with shiny things. i’ve always thought i belong more on horsebacks than cars, with the feeling of the wind and bumps of the road than smooth, fast vehicles that makes you feel barely like moving. i preferred traveling on endless fields of grass than endless highways or tracks. i preferred loving one person entirely with no choice and giving completely than always finding the optimal solution with endless trying. frangipani flowers. they are not of the most dashing shape nor mix of color, they don’t mean to attract. the smell simply takes those who feel like it home. in my mind, i believe that someone or something would take me home, even if it means home was several decades of centuries ago. even if it means we’re old bones ancient souls in a society with all fast-moving things and never-stopping people. i believe.

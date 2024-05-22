@@ -1,27 +1,14 @@
 ---
 layout: post
-title:  Strive not to be a success, but rather to be of value
-description: Bring to the table win-win survival strategies to ensure proactive domination. At the end of the day, going forward, a new normal that. Capitalize on low hanging fruit to identify a ballpark value activity to beta test. Override the digital divide with additional.
+title:  walking from next to baker
+description:  thoughts in chinese
 date:   2020-11-10 15:01:35 +0300
 image:  '/images/05.jpg'
 tags:   [technology, workflow, story]
 ---
 
-In qua quid est boni praeter summam voluptatem, et eam sempiternam? Cur post Tarentum ad Archytam? Qua ex cognitione facilior facta est investigatio rerumano occultissimarum. Negat enim tenuissimo victu, id est contemptissimis escis et sed potionibus, minorem voluptatem. Ego quoque, inquit, didicerim libentius si quiduse.
+我终于又成为了自己，不依靠任何人任何事物存在的呼吸着的自己。一步一步，从next沿着河边走向baker，感觉走过沉睡的城市，走过繁华，走过呼啸而过的车，偶尔窥听随机馈赠掉落耳边的来自车内的音乐。感觉这一生也就是一步一步走过人世间，走过河对岸的繁华，走过黑灯瞎火一个人的路口，也继续一步一步走着。
 
-Podcasting operational change management inside of workflows to establish a framework. Taking seamless key performance indicators offline to maximise the long tail. Keeping your eye on the ball while performing a deep dive on the start-up mentality to derive convergence on cross-platform integration.
+好像又回到了当时在云南，在山边徒步的时候，一步一步好像自己可以永远这么走下去，毕竟，也这样走了这么远不是么。剩下来的人生，也不洽洽像这河边独自渡步，这风景和时间，是我在穿过它还是它在穿过我，我们互相穿过，在那个时间切片短暂合为一体后又分开。
 
-<div class="gallery-box">
-  <div class="gallery">
-    <img src="/images/05-1.jpg" loading="lazy" alt="Woman and car">
-  </div>
-  <em>Photo by <a href="https://unsplash.com/photos/9TUkYXQKXec" target="_blank">Olenka Kotyk</a> on <a href="https://unsplash.com/" target="_blank">Unsplash</a></em>
-</div>
-
-Capitalize on low hanging fruit to identify a ballpark value added activity to beta test. Override the digital divide with additional clickthroughs from DevOps. Nanotechnology immersion along the information highway will close the loop on focusing solely on the bottom line. Collaboratively administrate turnkey channels whereas virtual e-tailers. Objectively seize scalable metrics whereas proactive e-services. Seamlessly empower fully researched growth strategies and interoperable internal or “organic” sources.
-
-> The longer I live, the more I realize that I am never wrong about anything, and that all the pains I have so humbly taken to verify my notions have only wasted my time!
-
-Leverage agile frameworks to provide a robust synopsis for high level overviews. Iterative approaches to corporate strategy foster collaborative thinking to further the overall value proposition. Organically grow the holistic world view of disruptive innovation via workplace diversity and empowerment.
-
-Completely synergize resource taxing relationships via premier niche markets. Professionally cultivate one-to-one customer service with robust ideas. Dynamically innovate resource-leveling customer service for state of the art customer service.
+最近看到身边的树的绿色，是一种嫩绿。我很喜欢那种树枝尖芽芽的嫩绿 ，我想让这种绿穿过我的身体，把我沁透成不折不扣的绿，一尘不染的绿，树枝嫩芽从我四肢末端伸展，让我永生在这个夏天。我想用皮肤的每一处呼吸，把属于这个季节的绿吸进我身体，阳光也吸进我身体，让我成为这一刻的纪念品。

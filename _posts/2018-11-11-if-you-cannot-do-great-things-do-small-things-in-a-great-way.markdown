@@ -1,52 +1,32 @@
 ---
 layout: post
-title:  If you cannot do great things, do small things in a great way
-description: Bring to the table win-win survival strategies to ensure proactive domination. At the end of the day, going forward, a new normal that. Capitalize on low hanging fruit to identify a ballpark value activity to beta test. Override the digital divide with additional.
-date:   2020-11-11 15:01:35 +0300
-image:  '/images/04.jpg'
-tags:   [lifestyle, rest, notes]
+title:  If i were wind, love is gravity
+description: random thoughts
+date:   2024-05-08 19:01:35 +0300
+image:  '/images/senior_portrait.jpg'
+tags:   [thoughts,life]
 ---
 
-In qua quid est boni praeter summam voluptatem, et eam sempiternam? Cur post Tarentum ad Archytam? Qua ex cognitione facilior facta est investigatio rerumano occultissimarum. Negat enim tenuissimo victu, id est contemptissimis escis et sed potionibus, minorem voluptatem. Ego quoque, inquit, didicerim libentius si quiduse.
+Today my brother was throwing a fit, saying how he feels 很烦 and he says he doesn’t know why and just feels very annoyed and angry and he doesn’t know what to do. He looks so troubled it breaks my heart. I was trying to talk to him while not having my mom worry too much. I want to make him happy, want to be a source of dependence for him. I’ve been to the dark side, if for anything, i want to think it’s for how I can guide my love ones out of that mental maze / monster that we all have deep (some scarier than the others).
 
-Podcasting operational change management inside of workflows to establish a framework. Taking seamless key performance indicators offline to maximise the long tail. Keeping your eye on the ball while performing a deep dive on the start-up mentality to derive convergence on cross-platform integration.
+All the time I was talking to him, I was so scared of my mom worrying. I already had my mom worry too much when I was suffering, lost, I definitely don’t want her to go through that same worry for her children again. I got this. I hope I can shoulder everything and not have the worry, the pain, the anxiety of it all go to her gain. And the fact that I didn’t tell my dad about how my background verification was declined for the 4th time is because I know he would worry and get even more anxious.
 
-<div class="gallery-box">
-  <div class="gallery">
-    <img src="/images/04-1.jpg" loading="lazy" alt="Car">
-  </div>
-  <em>Photo by <a href="https://unsplash.com/photos/J-hcCjSuPm4" target="_blank">Andre Tan</a> on <a href="https://unsplash.com/" target="_blank">Unsplash</a></em>
-</div>
+Then I remember I forgot to call my grandma this morning, she was sad that last time I called home I mainly talked to my dad about things I had to do, and didn’t have time to talk to her. So I said I would call her. Grandma sometimes easily lonely and talking to me helps a lot.
 
-Capitalize on low hanging fruit to identify a ballpark value added activity to beta test. Override the digital divide with additional clickthroughs from DevOps. Nanotechnology immersion along the information highway will close the loop on focusing solely on the bottom line. Collaboratively administrate turnkey channels whereas virtual e-tailers. Objectively seize scalable metrics whereas proactive e-services. Seamlessly empower fully researched growth strategies and interoperable internal or “organic” sources.
+Sometimes I find it so hard juggling between the different responsibilities , as a daughter who wants to lift the weight off her parents’ shoulders, and a granddaughter who wants her grandma to feel happy an cared for and not lonely, as an older sibling who wants to be the steady sword and shield for her younger sibling, as the oldest child who wants to take care of the family, and then, as someone who’s a student, who needs to make decision of her life, as someone who is entering society needs have a career. All of these responsibilities make me feel chained down. A while ago, (maybe a year two years)?, i wrote the following paragraph titled 如果我是风 (if i were wind).
 
 <div class="gallery-box">
   <div class="gallery">
-    <img src="/images/04-5.jpg" loading="lazy" alt="Sea">
-    <img src="/images/04-3.jpg" loading="lazy" alt="San Francisco">
+    <img src="/images/if.png" loading="lazy" alt="Project">
   </div>
 </div>
 
-In qua quid est boni praeter summam voluptatem, et eam sempiternam? Cur post Tarentum ad Archytam? Qua ex cognitione facilior facta est investigatio rerumano occultissimarum. Negat enim tenuissimo victu, id est contemptissimis escis et sed potionibus, minorem voluptatem. Ego quoque, inquit, didicerim libentius si quiduse.
+I used to imagine, how nice it would be to be a gust of wind, i could leave everything behind and just see the world, i could go to the volcanos, and maybe even inside the sea, i could fly like i always wanted to. yet, there’s gravity chaining me down. I can’t just jump in the air and go.
 
-Completely synergize resource taxing relationships via premier niche markets. Professionally cultivate one-to-one customer service with robust ideas. Dynamically innovate resource-leveling customer service for state of the art customer service.
+and I also used to think, the reason why Larry from razor’s edge could just leave everything behind, is that he didn’t love anyone. He didn’t have parents, no siblings, he was raised by a family friend to whom he’s not close to, even if he had been engaged to Isabel, it wasn’t any profund, inseparable love, it’s just any other teenage couple’s love, maybe even a bit selfish. As such, loveless, he’s free to put truth above love, he’s free to roam the world in search for his own truth, happiness and fulfillment, since he only has himself to take care of, and he’s the only one who can make himself happy.
 
+But can I?
 
-<div class="gallery-box">
-  <div class="gallery">
-    <img src="/images/04-4.jpg" loading="lazy" alt="Woman">
-  </div>
-  <em>Photo by <a href="https://unsplash.com/photos/2smDZopBMso" target="_blank">Brandon Nelson</a> on <a href="https://unsplash.com/" target="_blank">Unsplash</a></em>
-</div>
+I put love above truth, I put love ones’ happiness above my own, love ones’ truths above my own. Before I can be happy in my rogue ways, I have to ensure my loved ones are cared for provided for, that they see me in a good place. Only then I can be happy. Somehow I’m tied down to the Earth by my responsibilities in ways that wind and Larry had not been.
 
-Bring to the table win-win survival strategies to ensure proactive domination. At the end of the day, going forward, a new normal that has evolved from generation X is on the runway heading towards a streamlined cloud solution. User generated content in real-time will have multiple touchpoints for offshoring.
-
-Phosfluorescently engage worldwide methodologies with web-enabled technology. Interactively coordinate proactive e-commerce via process-centric “outside the box” thinking. Completely pursue scalable customer service through sustainable Charis Sims.
-
-> The longer I live, the more I realize that I am never wrong about anything, and that all the pains I have so humbly taken to verify my notions have only wasted my time!
-
-Objectively innovate empowered manufactured products whereas parallel platforms. Holisticly predominate extensible testing procedures for reliable supply chains. Dramatically engage top-line web services vis-a-vis cutting-edge deliverables.
-
-Leverage agile frameworks to provide a robust synopsis for high level overviews. Iterative approaches to corporate strategy foster collaborative thinking to further the overall value proposition. Organically grow the holistic world view of disruptive innovation via workplace diversity and empowerment.
-
-Completely synergize resource taxing relationships via premier niche markets. Professionally cultivate one-to-one customer service with robust ideas. Dynamically innovate resource-leveling customer service for state of the art customer service.
+I guess love is gravity.

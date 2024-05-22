@@ -1,52 +1,22 @@
 ---
 layout: post
-title:  A journey of a thousand leagues begins beneath one’s feet
-description: Bring to the table win-win survival strategies to ensure proactive domination. At the end of the day, going forward, a new normal that. Capitalize on low hanging fruit to identify a ballpark value activity to beta test. Override the digital divide with additional.
+title:  OneReplubic singing Counting stars at Boston JingleBall
+description: Nostagia
 date:   2020-11-09 15:01:35 +0300
 image:  '/images/06.jpg'
 tags:   [travel, story, rest]
 ---
 
-In qua quid est boni praeter summam voluptatem, et eam sempiternam? Cur post Tarentum ad Archytam? Qua ex cognitione facilior facta est investigatio rerumano occultissimarum. Negat enim tenuissimo victu, id est contemptissimis escis et sed potionibus, minorem voluptatem. Ego quoque, inquit, didicerim libentius si quiduse.
+今天晚上和zdq还有几个好朋友一起去看了波士顿的jingle ball，她们是为了看nct dream，而我抱着纯纯打酱油的心态，结果却叫的比她们还响，蹦的比她们还高。在看完nct dream 后面还有几个艺人表演，看完各自老公的zdq和朋友们已经坐下养神了，在看到one republic出来的时候我站起来了。
 
-Podcasting operational change management inside of workflows to establish a framework. Taking seamless key performance indicators offline to maximise the long tail. Keeping your eye on the ball while performing a deep dive on the start-up mentality to derive convergence on cross-platform integration.
+记着这个乐队的名字这么深还是因为Counting Stars这首歌，一首我自己不会专门去搜着听的歌，却是初中时候每天午休后学校广播放的那一首。那时候，学生会的宣传部刚开始推广一个唱英文歌的全校活动，每天午休回来学校的广播就开始放一首英文歌，全校的每个班在那个时候都要站起来唱，每个人发了一张歌词，相当于第二个眼保健操活动 except it was for learning English. 第一周的歌曲就是counting stars，后面还有katy perry 的fireworks 还有owl city 的一首歌好像是good time，我有点记不得了，但是没有一首像counting stars 一样渍染那个时候的色彩(so uniquely belonging to that era). Sometimes I think time puts a timestamp on a song, 所以当one republic 今晚唱起counting star的前奏的时候，我好像又是当年拿着派发歌词，在自己的桌子前努力对嘴型的我。
 
-<div class="gallery-box">
-  <div class="gallery">
-    <img src="/images/06-1.jpg" loading="lazy" alt="City">
-  </div>
-  <em>Photo by <a href="https://unsplash.com/photos/-VdxocSceF0" target="_blank">Jalen Terry</a> on <a href="https://unsplash.com/" target="_blank">Unsplash</a></em>
-</div>
+当时我在想什么呢，肯定不会是想着，从学校广播里传出来的音乐和声音，会在8年后9年后从演唱者的嘴里现场通过麦克风里传进我耳朵，当时我肯定没有在想这个。可能在想着下午上什么课，考托福，竞选学生会，不要被老师发现我在对嘴型等等…眼前那么多看起来那么巨大和不可战胜的事情。
 
-Capitalize on low hanging fruit to identify a ballpark value added activity to beta test. Override the digital divide with additional clickthroughs from DevOps. Nanotechnology immersion along the information highway will close the loop on focusing solely on the bottom line. Collaboratively administrate turnkey channels whereas virtual e-tailers. Objectively seize scalable metrics whereas proactive e-services. Seamlessly empower fully researched growth strategies and interoperable internal or “organic” sources.
+但现在这首歌不再是从深圳一所公立初中教室里的广播传出来，而是真正从离我就20米远的One Republic主唱移动的嘴里面唱出来，我现在在波士顿，在美国上学，在这一段连接当时的counting star和现在的counting star，当时的我和现在的我的时光里，我考了托福，去了想去的美国高中。在我最想去的美国高中里，生活却远比理想中的艰难坎坷，骄傲和理想被狠狠在被淹没在洗澡隔间的眼泪里（因为我绝对没有办法在人面前哭，在多人间的时候只能去洗澡的隔间，开着水的声音打掩护然后蹲着哭），但这些低谷的时候在印象里都离我好远好远了，因为我也已经知道，没有人的生活是一直往上走的，一个人的人生一定是波动的，有时候你觉得很好的结局，不一定能给你带来所期待的快乐和体验，可能一些没有那么理想的结局，却能找到意想不到的发现。在每个人的一生中，都需要和自我挣扎，最后合一。每个人的破茧过程，都是为了离真实的自已更近一步。
 
-<div class="gallery-box">
-  <div class="gallery">
-    <img src="/images/06-2.jpg" loading="lazy" alt="Sea">
-    <img src="/images/06-3.jpg" loading="lazy" alt="San Francisco">
-  </div>
-</div>
+时光只能朝一个方向移动，虽然现在的我能置身于7–8年前的我的脑子里，窥入当时孩童般的傲气，觉得一切命运必须怎样由我掌控，也无能告诫那孙悟空般好斗的自己，没有人的生命是能一直往上的，也没有什么巅峰所言，你会被低谷击倒到只能慢慢爬着前行，但每一步，是拼命往前往上还是被波浪暗流带着往后，都也只是离真实的自己更近一步罢了。
 
-In qua quid est boni praeter summam voluptatem, et eam sempiternam? Cur post Tarentum ad Archytam? Qua ex cognitione facilior facta est investigatio rerumano occultissimarum. Negat enim tenuissimo victu, id est contemptissimis escis et sed potionibus, minorem voluptatem. Ego quoque, inquit, didicerim libentius si quiduse.
+现在听到这首歌的我，在喜欢的地方（虽然很快要毕业了 ），和喜欢的朋友们呆在一起，感到很满足，我也知道，在未来的生活，肯定也不像我最初期待的那样（就像没有人的生活是那样）是一定一路向上的，肯定也会有难以预料的坎坷和困难，但起码，它们现在也都在我的预料之中了，所以就欢迎一切的到来就好了。Every once in while，这样的时刻，让我觉得一切刚刚好，身边的人和风景，都觉得刚刚好值得那些跌倒完再慢慢爬起来探索的自己。
 
-Completely synergize resource taxing relationships via premier niche markets. Professionally cultivate one-to-one customer service with robust ideas. Dynamically innovate resource-leveling customer service for state of the art customer service.
-
-
-<div class="gallery-box">
-  <div class="gallery">
-    <img src="/images/06-4.jpg" loading="lazy" alt="City">
-  </div>
-  <em>Photo by <a href="https://unsplash.com/photos/3xpalrYpiwo" target="_blank">Nick Dunlap</a> on <a href="https://unsplash.com/" target="_blank">Unsplash</a></em>
-</div>
-
-Bring to the table win-win survival strategies to ensure proactive domination. At the end of the day, going forward, a new normal that has evolved from generation X is on the runway heading towards a streamlined cloud solution. User generated content in real-time will have multiple touchpoints for offshoring.
-
-Phosfluorescently engage worldwide methodologies with web-enabled technology. Interactively coordinate proactive e-commerce via process-centric “outside the box” thinking. Completely pursue scalable customer service through sustainable Charis Sims.
-
-> The longer I live, the more I realize that I am never wrong about anything, and that all the pains I have so humbly taken to verify my notions have only wasted my time!
-
-Objectively innovate empowered manufactured products whereas parallel platforms. Holisticly predominate extensible testing procedures for reliable supply chains. Dramatically engage top-line web services vis-a-vis cutting-edge deliverables.
-
-Leverage agile frameworks to provide a robust synopsis for high level overviews. Iterative approaches to corporate strategy foster collaborative thinking to further the overall value proposition. Organically grow the holistic world view of disruptive innovation via workplace diversity and empowerment.
-
-Completely synergize resource taxing relationships via premier niche markets. Professionally cultivate one-to-one customer service with robust ideas. Dynamically innovate resource-leveling customer service for state of the art customer service.
+演唱会结束我们来吃gopchang story了，我要开始吃啦！
