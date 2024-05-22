@@ -1,30 +1,40 @@
 ---
-title: Ride My Bike
+title: Localziation, Path Planning and Lane Racing
 date: 2022-01-05 08:01:35 +0300
-subtitle: Procreate
-image: '/images/project-6.jpg'
+subtitle: Robotics Science and Systems
+image: '/images/rss-4.JPG'
 ---
 
-In qua quid est boni praeter summam voluptatem, et eam sempiternam? Cur post Tarentum ad Archytam? Qua ex cognitione facilior facta est investigatio rerumano occultissimarum. Negat enim tenuissimo victu, id est contemptissimis escis et sed potionibus, minorem voluptatem. Ego quoque, inquit, didicerim libentius si table quiduse proactive domination.
+
+My co-parents of racecar 19, RSS Team 2.
 
 <div class="gallery-box">
   <div class="gallery">
-    <img src="/images/project-example-1.jpg" loading="lazy" alt="Project">
-    <img src="/images/project-example-2.jpg" loading="lazy" alt="Project">
-    <img src="/images/project-example-3.jpg" loading="lazy" alt="Project">
+    <img src="/images/rss-1.JPG" loading="lazy" alt="Project">
   </div>
   <em>Gallery / <a href="https://unsplash.com/" target="_blank">Unsplash</a></em>
 </div>
 
-Capitalize on low hanging fruit to identify a ballpark value added activity to beta test. Override the digital divide with additional clickthroughs from DevOps. Nanotechnology immersion along the information highway will close the loop on focusing solely on the bottom line. Collaboratively administrate turnkey channels whereas virtual e-tailers. Objectively seize scalable metrics whereas proactive e-services. Seamlessly empower fully researched growth strategies and interoperable internal or “organic” sources.
+For the Robotics Science and Systems class, we implementeed several key functions used in robotics systems today such as localization with particle filters, path planning with A*, pure pursuit line following, and other computer vision functions.
+
+Here's a demonstration of robot using color segmentation to park in front of a orange cone.
+<div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/948597518?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="color segmentation"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>
+
+[Download report on Localization](/images/Lab5_Report.pdf)
+
+[Download report on Path Planning](/images/Lab6_Report.pdf)
+
+[Download report on Final race](/images/RSS_Final_Report.pdf)
+
+
 
 <div class="gallery-box">
   <div class="gallery">
-    <img src="/images/project-example-4.jpg" loading="lazy" alt="Project">
-    <img src="/images/project-example-5.jpg" loading="lazy" alt="Project">
+    <img src="/images/rss5.JPG" loading="lazy" alt="Project">
+    <img src="/images/rss6.JPG" loading="lazy" alt="Project">
+    <img src="/images/rss7.JPG" loading="lazy" alt="Project">
+    <img src="/images/rss8.JPG" loading="lazy" alt="Project">
+    <img src="/images/rss-2.JPG" loading="lazy" alt="Project">
+    <img src="/images/rss-3.JPG" loading="lazy" alt="Project">
   </div>
 </div>
-
-In qua quid est boni praeter summam voluptatem, et eam sempiternam? Cur post Tarentum ad Archytam? Qua ex cognitione facilior facta est investigatio rerumano occultissimarum. Negat enim tenuissimo victu, id est contemptissimis escis et sed potionibus, minorem voluptatem. Ego quoque, inquit, didicerim libentius si quiduse worldwide methodologies.
-
-Completely synergize resource taxing relationships via premier niche markets. Professionally cultivate one-to-one customer service with robust ideas. Dynamically innovate resource-leveling customer service for state of the art customer coordinate.
