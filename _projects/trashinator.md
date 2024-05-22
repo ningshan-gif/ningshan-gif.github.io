@@ -2,7 +2,7 @@
 title: Trashinator
 date: 2022-01-04 08:01:35 +0300
 subtitle: A robot that picks up trash
-image: '/images/jackal4.jpg'
+image: '/images/jackal4.JPG'
 ---
 
 

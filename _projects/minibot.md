@@ -2,7 +2,7 @@
 title: Mini PID bot
 date: 2022-01-02 08:01:35 +0300
 subtitle: NEET Autonomous Machines Competition
-image: '/images/mini.png'
+image: '/images/mini.PNG'
 ---
 
 Fall 2021: I built a robot using Arduino, color sensor and PID control My robot won 1st place in the NEET Autonomous Machines competition. The challenge is the navigate through a maze with black lines successfully and accurately despite corners and intersections minimizing total time. 
