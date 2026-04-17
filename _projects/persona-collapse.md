@@ -2,7 +2,7 @@
 title: Persona Collapse
 date: 2024-08-19 08:02:35 +0300
 subtitle: Studying how language models compress human variation
-image: '/images/persona-collapse/kmeans_clusters.png'
+image: '/images/persona-collapse/spectral_clusters.png'
 ---
 
 When language models are asked to respond as many different kinds of people — different ages, political views, personality traits, socioeconomic backgrounds — do they actually produce meaningfully different responses? Or do they collapse distinct personas into a small set of repeated behavioral patterns?

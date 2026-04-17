@@ -2,7 +2,7 @@
 title: Caveman Papers
 date: 2024-08-19 08:03:35 +0300
 subtitle: Animation agents that turn research papers into short-form reels
-image: '/images/caveman-papers/thumb.jpg'
+image: '/images/caveman-papers/frame_3d.jpg'
 ---
 
 Many great research papers never reach the people who would actually enjoy them. The format asks for too much attention before you know whether you care. Caveman Papers is an animation agent pipeline I built to change that: give it a PDF, and it produces a short vertical reel — something you can watch in 60 seconds and decide whether to go deeper.

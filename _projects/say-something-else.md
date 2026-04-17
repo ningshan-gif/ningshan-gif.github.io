@@ -2,7 +2,7 @@
 title: Say Something Else
 date: 2024-08-19 08:01:35 +0300
 subtitle: Privacy-preserving LLM communication through information sufficiency
-image: '/images/say-something-else/teaser.png'
+image: '/images/say-something-else/protocol.png'
 ---
 
 LLM agents increasingly draft messages on behalf of users — time-off requests, rental inquiries, job applications. But when a user shares private context to guide the agent (say, that they need schedule flexibility for chemotherapy), a naive system may surface that detail directly in the message. This project asks: how can an agent help someone communicate effectively while revealing as little private information as possible?
