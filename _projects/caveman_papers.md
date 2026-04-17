@@ -1,6 +1,6 @@
 ---
 title: Caveman Papers
-date: 2026-04-17 08:01:35 +0300
+date: 2024-08-19 08:03:35 +0300
 subtitle: Animation agents that turn research papers into short-form reels
 image: '/images/caveman-papers/thumb.jpg'
 ---

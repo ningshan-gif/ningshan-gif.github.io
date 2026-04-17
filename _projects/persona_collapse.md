@@ -1,6 +1,6 @@
 ---
 title: Persona Collapse
-date: 2026-04-17 08:01:35 +0300
+date: 2024-08-19 08:02:35 +0300
 subtitle: Studying how language models compress human variation
 image: '/images/persona-collapse/kmeans_clusters.png'
 ---

@@ -1,6 +1,6 @@
 ---
 title: Say Something Else
-date: 2026-04-17 08:01:35 +0300
+date: 2024-08-19 08:01:35 +0300
 subtitle: Privacy-preserving LLM communication through information sufficiency
 image: '/images/say-something-else/teaser.png'
 ---
