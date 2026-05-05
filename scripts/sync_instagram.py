@@ -14,10 +14,13 @@ import yaml
 try:
     import requests
     from bs4 import BeautifulSoup
+    from playwright.sync_api import sync_playwright
 except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "requests", "beautifulsoup4"])
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "requests", "beautifulsoup4", "playwright"])
+    subprocess.check_call([sys.executable, "-m", "playwright", "install", "chromium", "--with-deps"])
     import requests
     from bs4 import BeautifulSoup
+    from playwright.sync_api import sync_playwright
 
 INSTAGRAM_USERNAME = "sleepychunk"
 OUTPUT_DIR = "images/instagram"
@@ -42,16 +45,52 @@ def load_existing():
 
 
 def scrape_posts():
-    # Try multiple public Instagram viewers in order
-    scrapers = [_scrape_picuki, _scrape_imginn]
+    # Try headless browser first (bypasses bot detection), then plain HTTP
+    scrapers = [_scrape_playwright, _scrape_picuki, _scrape_imginn]
     for scraper in scrapers:
         try:
             posts = scraper()
             if posts:
+                print(f"Success with {scraper.__name__}")
                 return posts
         except Exception as e:
             print(f"{scraper.__name__} failed: {e}")
     return []
+
+
+def _scrape_playwright():
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        context = browser.new_context(
+            user_agent=HEADERS["User-Agent"],
+            locale="en-US",
+        )
+        page = context.new_page()
+        page.goto(f"https://www.picuki.com/profile/{INSTAGRAM_USERNAME}", timeout=30000)
+        page.wait_for_load_state("networkidle", timeout=20000)
+        html = page.content()
+        browser.close()
+
+    soup = BeautifulSoup(html, "html.parser")
+    posts = []
+    for item in soup.select(".box-photo"):
+        img_tag = item.select_one("img")
+        link_tag = item.select_one("a[href]")
+        if not img_tag:
+            continue
+        img_url = img_tag.get("src", "")
+        if not img_url or not img_url.startswith("http"):
+            continue
+        shortcode = ""
+        if link_tag:
+            m = re.search(r"/media/([^/]+)", link_tag["href"])
+            if m:
+                shortcode = m.group(1)
+        caption = img_tag.get("alt", "photo from @sleepychunk")[:120]
+        posts.append({"img_url": img_url, "shortcode": shortcode, "caption": caption})
+        if len(posts) >= MAX_POSTS:
+            break
+    return posts
 
 
 def _scrape_picuki():

@@ -24,7 +24,9 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install requests beautifulsoup4 pyyaml
+        run: |
+          pip install requests beautifulsoup4 pyyaml playwright
+          playwright install chromium --with-deps
 
       - name: Sync photos from @sleepychunk
         run: python scripts/sync_instagram.py
