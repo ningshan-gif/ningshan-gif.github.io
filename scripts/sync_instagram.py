@@ -42,6 +42,46 @@ def load_existing():
 
 
 def scrape_posts():
+    # Try multiple public Instagram viewers in order
+    scrapers = [_scrape_picuki, _scrape_imginn]
+    for scraper in scrapers:
+        try:
+            posts = scraper()
+            if posts:
+                return posts
+        except Exception as e:
+            print(f"{scraper.__name__} failed: {e}")
+    return []
+
+
+def _scrape_picuki():
+    url = f"https://www.picuki.com/profile/{INSTAGRAM_USERNAME}"
+    r = requests.get(url, headers=HEADERS, timeout=30)
+    r.raise_for_status()
+    soup = BeautifulSoup(r.text, "html.parser")
+
+    posts = []
+    for item in soup.select(".box-photo"):
+        img_tag = item.select_one("img")
+        link_tag = item.select_one("a[href]")
+        if not img_tag:
+            continue
+        img_url = img_tag.get("src", "")
+        if not img_url or not img_url.startswith("http"):
+            continue
+        shortcode = ""
+        if link_tag:
+            m = re.search(r"/media/([^/]+)", link_tag["href"])
+            if m:
+                shortcode = m.group(1)
+        caption = img_tag.get("alt", "photo from @sleepychunk")[:120]
+        posts.append({"img_url": img_url, "shortcode": shortcode, "caption": caption})
+        if len(posts) >= MAX_POSTS:
+            break
+    return posts
+
+
+def _scrape_imginn():
     url = f"https://imginn.com/{INSTAGRAM_USERNAME}/"
     r = requests.get(url, headers=HEADERS, timeout=30)
     r.raise_for_status()
@@ -53,24 +93,18 @@ def scrape_posts():
         link_tag = item.select_one("a[href]")
         if not img_tag:
             continue
-
         img_url = img_tag.get("data-src") or img_tag.get("src", "")
         if not img_url or "jpg" not in img_url:
             continue
-
-        # Extract shortcode from the post link e.g. /p/ABC123/
         shortcode = ""
         if link_tag:
             m = re.search(r"/p/([^/]+)/", link_tag["href"])
             if m:
                 shortcode = m.group(1)
-
         caption = img_tag.get("alt", "photo from @sleepychunk")[:120]
         posts.append({"img_url": img_url, "shortcode": shortcode, "caption": caption})
-
         if len(posts) >= MAX_POSTS:
             break
-
     return posts
 
 
