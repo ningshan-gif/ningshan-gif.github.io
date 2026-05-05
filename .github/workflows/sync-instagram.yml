@@ -1,0 +1,30 @@
+name: Sync Instagram Photos
+
+on:
+  schedule:
+    # Runs once a day at 9 AM UTC
+    - cron: "0 9 * * *"
+  workflow_dispatch: # manual trigger from GitHub Actions tab
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install instaloader requests pyyaml
+
+      - name: Sync photos from @sleepychunk
+        run: python scripts/sync_instagram.py
