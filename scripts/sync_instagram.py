@@ -49,6 +49,17 @@ def sync():
         quiet=True,
     )
 
+    # Log in if credentials are provided (required when running from cloud IPs)
+    ig_user = os.environ.get("INSTAGRAM_USER")
+    ig_pass = os.environ.get("INSTAGRAM_PASS")
+    if ig_user and ig_pass:
+        try:
+            L.login(ig_user, ig_pass)
+            print(f"Logged in as @{ig_user}")
+        except Exception as e:
+            print(f"Login failed: {e}")
+            sys.exit(1)
+
     try:
         profile = instaloader.Profile.from_username(L.context, INSTAGRAM_USERNAME)
     except Exception as e:

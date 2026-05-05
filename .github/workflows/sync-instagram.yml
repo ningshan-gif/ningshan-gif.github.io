@@ -27,4 +27,7 @@ jobs:
         run: pip install instaloader requests pyyaml
 
       - name: Sync photos from @sleepychunk
+        env:
+          INSTAGRAM_USER: ${{ secrets.INSTAGRAM_USER }}
+          INSTAGRAM_PASS: ${{ secrets.INSTAGRAM_PASS }}
         run: python scripts/sync_instagram.py
