@@ -21,4 +21,24 @@ tags: [photography, instagram]
 用你的关怀和所有的爱
 为这个世界添一些美丽色彩
 
+<div class="gallery-box">
+  <div class="gallery">
+    <img src="/images/instagram/DX-4GFIlHtl.jpg" loading="lazy">
+    <img src="/images/instagram/DX-4GFIlHtl_2.jpg" loading="lazy">
+    <img src="/images/instagram/DX-4GFIlHtl_3.jpg" loading="lazy">
+    <img src="/images/instagram/DX-4GFIlHtl_4.jpg" loading="lazy">
+    <img src="/images/instagram/DX-4GFIlHtl_5.jpg" loading="lazy">
+    <img src="/images/instagram/DX-4GFIlHtl_6.jpg" loading="lazy">
+    <img src="/images/instagram/DX-4GFIlHtl_7.jpg" loading="lazy">
+    <img src="/images/instagram/DX-4GFIlHtl_8.jpg" loading="lazy">
+    <img src="/images/instagram/DX-4GFIlHtl_9.jpg" loading="lazy">
+    <img src="/images/instagram/DX-4GFIlHtl_10.jpg" loading="lazy">
+    <img src="/images/instagram/DX-4GFIlHtl_11.jpg" loading="lazy">
+    <img src="/images/instagram/DX-4GFIlHtl_12.jpg" loading="lazy">
+    <img src="/images/instagram/DX-4GFIlHtl_13.jpg" loading="lazy">
+    <img src="/images/instagram/DX-4GFIlHtl_14.jpg" loading="lazy">
+    <img src="/images/instagram/DX-4GFIlHtl_15.jpg" loading="lazy">
+  </div>
+</div>
+
 *[@sleepychunk](https://www.instagram.com/p/DX-4GFIlHtl/) · May 5, 2026*

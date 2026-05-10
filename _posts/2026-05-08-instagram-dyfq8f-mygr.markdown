@@ -12,4 +12,18 @@ last year I traveled to Hangzhou to see the exhibit of my favorite author 三毛
 
 how do I maximize being human after intelligence and understanding of tokens has been done better by silicon-based things.
 
+<div class="gallery-box">
+  <div class="gallery">
+    <img src="/images/instagram/DYFQ8f_mygR.jpg" loading="lazy">
+    <img src="/images/instagram/DYFQ8f_mygR_2.jpg" loading="lazy">
+    <img src="/images/instagram/DYFQ8f_mygR_3.jpg" loading="lazy">
+    <img src="/images/instagram/DYFQ8f_mygR_4.jpg" loading="lazy">
+    <img src="/images/instagram/DYFQ8f_mygR_5.jpg" loading="lazy">
+    <img src="/images/instagram/DYFQ8f_mygR_6.jpg" loading="lazy">
+    <img src="/images/instagram/DYFQ8f_mygR_7.jpg" loading="lazy">
+    <img src="/images/instagram/DYFQ8f_mygR_8.jpg" loading="lazy">
+    <img src="/images/instagram/DYFQ8f_mygR_9.jpg" loading="lazy">
+  </div>
+</div>
+
 *[@sleepychunk](https://www.instagram.com/p/DYFQ8f_mygR/) · May 8, 2026*

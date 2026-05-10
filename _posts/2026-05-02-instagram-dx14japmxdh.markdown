@@ -12,4 +12,21 @@ my thoughts on photos: 照片是只存在于瞬间的东西，过了那个瞬间
 
 当我老了，我要看着这些照片，想起那些瞬间，那些时间节点有的想法，感受，活着的体验。我是观察的主体。
 
+<div class="gallery-box">
+  <div class="gallery">
+    <img src="/images/instagram/DX14japmxDh.jpg" loading="lazy">
+    <img src="/images/instagram/DX14japmxDh_2.jpg" loading="lazy">
+    <img src="/images/instagram/DX14japmxDh_3.jpg" loading="lazy">
+    <img src="/images/instagram/DX14japmxDh_4.jpg" loading="lazy">
+    <img src="/images/instagram/DX14japmxDh_5.jpg" loading="lazy">
+    <img src="/images/instagram/DX14japmxDh_6.jpg" loading="lazy">
+    <img src="/images/instagram/DX14japmxDh_7.jpg" loading="lazy">
+    <img src="/images/instagram/DX14japmxDh_8.jpg" loading="lazy">
+    <img src="/images/instagram/DX14japmxDh_9.jpg" loading="lazy">
+    <img src="/images/instagram/DX14japmxDh_10.jpg" loading="lazy">
+    <img src="/images/instagram/DX14japmxDh_11.jpg" loading="lazy">
+    <img src="/images/instagram/DX14japmxDh_12.jpg" loading="lazy">
+  </div>
+</div>
+
 *[@sleepychunk](https://www.instagram.com/p/DX14japmxDh/) · May 2, 2026*
