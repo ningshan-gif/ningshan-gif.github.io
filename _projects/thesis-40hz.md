@@ -35,4 +35,6 @@ Key engineering work:
 
 The 40Hz Toolbox is designed to serve as the software substrate for two lines of future clinical investigation: (1) gamma-entrainment-based reopening of visual plasticity in adult amblyopia, and (2) 40Hz stimulation as a non-invasive adjunct therapy in Alzheimer's disease. By delivering these protocols through consumer VR rather than laboratory equipment, the system bridges the gap between neuroscience findings and accessible, at-home treatment.
 
+The work has been filed as a patent application through MIT Technology Licensing Office, covering the VR-based delivery system for gamma-frequency therapeutic stimulation.
+
 Supported by the Picower Innovation Fund.
