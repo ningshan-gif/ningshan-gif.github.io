@@ -2,7 +2,7 @@
 layout: post
 title:  死亡与宇宙
 description:
-date:   2026-04-17 00:00:00 +0000
+date:   2025-04-17 00:00:00 +0000
 image:  '/images/head-5.JPG'
 ---
 

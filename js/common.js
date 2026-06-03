@@ -88,6 +88,132 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
   /* =======================
+  // Instagram 3D posts
+  ======================= */
+  const instagramPost = document.querySelector("[data-instagram-post]");
+
+  if (instagramPost) {
+    const gallery = instagramPost.querySelector(".gallery");
+    const galleryImages = gallery ? Array.from(gallery.querySelectorAll("img")) : [];
+    const postContent = instagramPost.querySelector(".post__content");
+
+    galleryImages.forEach((image, index) => {
+      const count = Math.max(galleryImages.length, 1);
+      const angle = (index / count) * Math.PI * 2;
+      const ring = index % 2 === 0 ? 260 : 155;
+      const lift = ((index % 5) - 2) * 34;
+      const depth = ((index % 6) - 2.5) * 44;
+      const rotate = ((index % 7) - 3) * 4;
+
+      image.classList.add("no-lightense");
+      image.setAttribute("tabindex", "0");
+      image.style.setProperty("--ig-x", `${Math.cos(angle) * ring}px`);
+      image.style.setProperty("--ig-y", `${Math.sin(angle) * (ring * .58) + lift}px`);
+      image.style.setProperty("--ig-z", `${depth}px`);
+      image.style.setProperty("--ig-r", `${rotate}deg`);
+    });
+
+    if (gallery) {
+      let isDragging = false;
+
+      const moveSpace = (event) => {
+        const rect = gallery.getBoundingClientRect();
+        const point = event.touches ? event.touches[0] : event;
+        const x = ((point.clientX - rect.left) / rect.width) - .5;
+        const y = ((point.clientY - rect.top) / rect.height) - .5;
+
+        gallery.style.setProperty("--ig-rotate-y", `${x * 18}deg`);
+        gallery.style.setProperty("--ig-rotate-x", `${y * -12}deg`);
+      };
+
+      gallery.addEventListener("mousemove", moveSpace);
+      gallery.addEventListener("touchmove", moveSpace, { passive: true });
+      gallery.addEventListener("pointerdown", (event) => {
+        isDragging = true;
+        moveSpace(event);
+      });
+      window.addEventListener("pointermove", (event) => {
+        if (isDragging) moveSpace(event);
+      });
+      window.addEventListener("pointerup", () => {
+        isDragging = false;
+      });
+      gallery.addEventListener("mouseleave", () => {
+        if (!isDragging) {
+          gallery.style.setProperty("--ig-rotate-y", "0deg");
+          gallery.style.setProperty("--ig-rotate-x", "0deg");
+        }
+      });
+    }
+
+    if (postContent) {
+      const cloud = document.createElement("div");
+      const rawWords = postContent.textContent
+        .replace(/https?:\/\/\S+/g, "")
+        .replace(/[@#][^\s]+/g, "")
+        .split(/\s+/)
+        .map((word) => word.replace(/[.,!?;:"'()[\]{}]/g, "").trim())
+        .filter((word) => word.length > 3)
+        .slice(0, 18);
+      const words = rawWords.length ? rawWords : ["sleepychunk", "memory", "image", "song"];
+
+      words.forEach((word, index) => {
+        const chip = document.createElement("span");
+        chip.textContent = word;
+        chip.style.setProperty("--word-x", `${8 + ((index * 29) % 84)}%`);
+        chip.style.setProperty("--word-y", `${18 + ((index * 17) % 64)}%`);
+        chip.style.setProperty("--word-r", `${((index % 7) - 3) * 5}deg`);
+        cloud.appendChild(chip);
+      });
+
+      cloud.className = "instagram-word-cloud";
+      postContent.appendChild(cloud);
+    }
+
+    const soundButton = instagramPost.querySelector("[data-instagram-sound-toggle]");
+    const musicUrl = instagramPost.dataset.musicUrl;
+    const instagramUrl = instagramPost.dataset.instagramUrl;
+    let audio = null;
+
+    if (soundButton) {
+      if (!musicUrl) {
+        const label = soundButton.querySelector("span");
+        if (label) label.textContent = "Play on Instagram";
+      }
+
+      soundButton.addEventListener("click", () => {
+        if (!musicUrl) {
+          window.open(instagramUrl, "_blank", "noopener");
+          return;
+        }
+
+        if (!audio) {
+          audio = new Audio(musicUrl);
+          audio.loop = true;
+          audio.addEventListener("ended", () => {
+            soundButton.classList.remove("is-playing");
+            soundButton.setAttribute("aria-pressed", "false");
+          });
+        }
+
+        if (audio.paused) {
+          audio.play().then(() => {
+            soundButton.classList.add("is-playing");
+            soundButton.setAttribute("aria-pressed", "true");
+          }).catch(() => {
+            window.open(instagramUrl, "_blank", "noopener");
+          });
+        } else {
+          audio.pause();
+          soundButton.classList.remove("is-playing");
+          soundButton.setAttribute("aria-pressed", "false");
+        }
+      });
+    }
+  }
+
+
+  /* =======================
   // Zoom Image
   ======================= */
   const lightense = document.querySelector(".page__content img, .post__content img, .project-content img, .gallery__image img"),

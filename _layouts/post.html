@@ -2,7 +2,13 @@
 layout: default
 ---
 
-<div class="post-head">
+{% assign is_instagram_post = false %}
+{% if page.tags contains "instagram" %}
+  {% assign is_instagram_post = true %}
+{% endif %}
+{% assign instagram_shortcode = page.image | split: "/" | last | split: "." | first %}
+
+<div class="post-head{% if is_instagram_post %} instagram-post-head{% endif %}">
   <div class="container">
     <div class="row">
 
@@ -24,6 +30,14 @@ layout: default
             <time class="post-date" datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date_to_string }}</time>
           </div>
 
+          {% if is_instagram_post %}
+            <div class="instagram-orbit-notes" aria-hidden="true">
+              <span>@sleepychunk</span>
+              <span>{{ page.date | date: "%B %-d, %Y" }}</span>
+              <span>drag the space</span>
+            </div>
+          {% endif %}
+
         </div>
       </div>
 
@@ -33,7 +47,7 @@ layout: default
 
 <div class="container">
   <div class="row">
-    {%if page.image %}
+    {% if page.image and is_instagram_post != true %}
     <div class="col col-12">
       <div class="post-image animate">
         <img class="lazy" data-src="{{site.baseurl}}{{page.image}}" alt="{{page.title}}">
@@ -46,7 +60,20 @@ layout: default
 <!-- begin post -->
 <div class="container animate">
 
-  <article class="post">
+  <article class="post{% if is_instagram_post %} instagram-post{% endif %}"{% if is_instagram_post %} data-instagram-post data-instagram-url="https://www.instagram.com/p/{{ instagram_shortcode }}/"{% if page.music_url %} data-music-url="{{ page.music_url }}"{% elsif page.audio %} data-music-url="{{ page.audio }}"{% endif %}{% endif %}>
+
+    {% if is_instagram_post %}
+      <div class="instagram-sound-panel" data-instagram-sound>
+        <button class="instagram-sound-button" type="button" data-instagram-sound-toggle aria-pressed="false">
+          <i class="ion ion-md-musical-note" aria-hidden="true"></i>
+          <span>Play post music</span>
+        </button>
+        <a class="instagram-source-link" href="https://www.instagram.com/p/{{ instagram_shortcode }}/" target="_blank" rel="noopener">
+          <i class="ion ion-logo-instagram" aria-hidden="true"></i>
+          <span>Open original audio</span>
+        </a>
+      </div>
+    {% endif %}
 
     <div class="post__content">
       {{ content }}

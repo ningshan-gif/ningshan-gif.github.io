@@ -5,7 +5,7 @@ permalink: /about/
 image: '/images/head-2.JPG'
 ---
 
-About me, name is Ningshan Ma, born and raised in Shenzhen, China. Went to New Hampshire for high school, graduated MIT majoring in computer science in 2024.
+Ningshan Ma, born and raised in Shenzhen, China. Went to New Hampshire for high school, graduated MIT majoring in computer science in 2024.
 
 <div class="gallery-box">
   <div class="gallery">
@@ -15,7 +15,7 @@ About me, name is Ningshan Ma, born and raised in Shenzhen, China. Went to New H
   </div>
 </div>
 
-Do these describe me enough? or are they just aliases for my label in the world. The real me is not here, not in any of these photos, not in any of these words, not on this website. The real me is simply a vessel for experiencing the world.
+Do these describe me enough? or are they just aliases for my label in the world. The real me is not here, not in any of these photos, not in any of these words, not on this website. The real me is simply a vessel for experiencing the world. I am this world.
 
 >  le vent se lève il faut tenter de vivre
 

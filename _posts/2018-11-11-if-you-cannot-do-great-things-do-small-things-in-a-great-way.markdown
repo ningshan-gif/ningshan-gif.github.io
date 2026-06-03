@@ -25,8 +25,6 @@ I used to imagine, how nice it would be to be a gust of wind, i could leave ever
 
 and I also used to think, the reason why Larry from razor’s edge could just leave everything behind, is that he didn’t love anyone. He didn’t have parents, no siblings, he was raised by a family friend to whom he’s not close to, even if he had been engaged to Isabel, it wasn’t any profund, inseparable love, it’s just any other teenage couple’s love, maybe even a bit selfish. As such, loveless, he’s free to put truth above love, he’s free to roam the world in search for his own truth, happiness and fulfillment, since he only has himself to take care of, and he’s the only one who can make himself happy.
 
-But can I?
-
-I put love above truth, I put love ones’ happiness above my own, love ones’ truths above my own. Before I can be happy in my rogue ways, I have to ensure my loved ones are cared for provided for, that they see me in a good place. Only then I can be happy. Somehow I’m tied down to the Earth by my responsibilities in ways that wind and Larry had not been.
+But can I? I put love above truth, I put love ones’ happiness above my own, love ones’ truths above my own. Before I can be happy in my rogue ways, I have to ensure my loved ones are cared for provided for, that they see me in a good place. Only then I can be happy. Somehow I’m tied down to the Earth by my responsibilities in ways that wind and Larry had not been.
 
 I guess love is gravity.
