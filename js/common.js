@@ -99,47 +99,53 @@ document.addEventListener("DOMContentLoaded", function() {
     const instagramUrl = instagramPost.dataset.instagramUrl;
     const REDUCED      = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // ── 1. Distribute images across 1–3 clusters in 3-D space ────────────
-    //    Cluster count depends on image count so every photo is clearly visible.
+    // ── 1. Distribute images across clusters — max 6 per cluster ─────────
+    //    Each cluster uses the original golden-angle sphere shape the user liked.
     const n = galleryImgs.length || 1;
-    const numClusters = n <= 7 ? 1 : n <= 14 ? 2 : 3;
+    const MAX_PER = 6;
+    const numClusters = Math.ceil(n / MAX_PER);
 
-    // Cluster center positions (triangle / line arrangement)
+    // Cluster centers spread through 3D space so each orb is clearly distinct.
+    // Z offset staggers depth so clusters don't visually merge during rotation.
     const CENTERS = [
-      { cx:    0, cy:   0, cz:   0 },   // single / center
-      { cx: -210, cy: -30, cz:  50 },   // left-front
-      { cx:  210, cy: -30, cz:  50 },   // right-front
-      { cx:    0, cy:  90, cz: -150 },  // bottom-back
+      { cx:    0, cy:   0, cz:    0 },   // 1 – center
+      { cx: -250, cy: -50, cz:  130 },   // 2 – left-front
+      { cx:  250, cy: -50, cz: -130 },   // 3 – right-back
+      { cx:    0, cy:  200, cz:   80 },  // 4 – bottom-front
+      { cx: -250, cy:  200, cz: -80 },   // 5 – bottom-left-back
+      { cx:  250, cy:  200, cz:  80 },   // 6 – bottom-right-front
     ];
 
-    // Local sphere radius depends on images-per-cluster
-    const clusterSize = Math.ceil(n / numClusters);
-    const LR = numClusters === 1 ? 220 : clusterSize <= 5 ? 110 : 130;
+    // Single cluster: keep the original large ellipsoid the user liked.
+    // Multi-cluster: scale down so each orb is self-contained and readable.
+    const RX = numClusters === 1 ? 310 : 210;
+    const RY = numClusters === 1 ? 210 : 145;
+    const RZ = numClusters === 1 ? 170 : 115;
     const GA = Math.PI * (3 - Math.sqrt(5)); // golden angle
 
     const imgs = galleryImgs.map((img, i) => {
-      const ci = Math.floor(i / clusterSize);           // which cluster
-      const li = i % clusterSize;                        // index within cluster
-      const lc = Math.min(clusterSize, n - ci * clusterSize); // actual images in this cluster
-      const cc = CENTERS[ci] || CENTERS[0];
+      const ci = Math.floor(i / MAX_PER);
+      const li = i % MAX_PER;
+      const lc = Math.min(MAX_PER, n - ci * MAX_PER);
+      const cc = CENTERS[Math.min(ci, CENTERS.length - 1)];
 
-      // Local golden-angle sphere within the cluster
+      // Golden-angle sphere distribution within each cluster
       const theta = li * GA;
       const phi   = Math.acos(1 - (2 * (li + 0.5)) / lc);
-      const lx = Math.sin(phi) * Math.cos(theta) * LR;
-      const ly = Math.cos(phi) * (LR * 0.68);
-      const lz = Math.sin(phi) * Math.sin(theta) * (LR * 0.52);
-      const lr = ((theta * 57.3) % 14) - 7;
+      const lx = Math.sin(phi) * Math.cos(theta) * RX;
+      const ly = Math.cos(phi) * RY;
+      const lz = Math.sin(phi) * Math.sin(theta) * RZ;
+      const lr = ((theta * 57.3) % 18) - 9;  // -9..+9 deg Z-tilt (original range)
 
       const bx = cc.cx + lx;
       const by = cc.cy + ly;
       const bz = cc.cz + lz;
 
-      // Per-image drift params (unique phase + speed per image)
+      // Per-image float params (varied so they drift independently)
       const ph  = (i / n) * Math.PI * 2;
-      const ay  = 10 + (i % 4) * 5;
-      const ax  = 4  + (i % 3) * 3;
-      const spd = 0.28 + (i % 7) * 0.06;
+      const ay  = 14 + (i % 4) * 6;
+      const ax  = 5  + (i % 3) * 3;
+      const spd = 0.32 + (i % 7) * 0.07;
 
       img.classList.add("no-lightense");
       img.setAttribute("tabindex", "0");
