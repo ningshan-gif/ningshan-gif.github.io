@@ -170,44 +170,78 @@ document.addEventListener("DOMContentLoaded", function() {
       postContent.appendChild(cloud);
     }
 
-    const soundButton = instagramPost.querySelector("[data-instagram-sound-toggle]");
     const musicUrl = instagramPost.dataset.musicUrl;
     const instagramUrl = instagramPost.dataset.instagramUrl;
-    let audio = null;
 
-    if (soundButton) {
-      if (!musicUrl) {
-        const label = soundButton.querySelector("span");
-        if (label) label.textContent = "Play on Instagram";
+    // --- Rich interactive player (when music_url is set) ---
+    const player = instagramPost.querySelector("[data-instagram-player]");
+    if (player) {
+      const playBtn = player.querySelector("[data-instagram-play-toggle]");
+      const playIcon = player.querySelector("[data-play-icon]");
+      const waveform = player.querySelector("[data-instagram-waveform]");
+      const progressWrap = player.querySelector("[data-instagram-progress-wrap]");
+      const progressBar = player.querySelector("[data-instagram-progress]");
+      const thumb = player.querySelector("[data-instagram-thumb]");
+      const timeEl = player.querySelector("[data-instagram-time]");
+      let audio = null;
+      let rafId = null;
+
+      function fmt(s) {
+        const m = Math.floor(s / 60);
+        const ss = String(Math.floor(s % 60)).padStart(2, "0");
+        return `${m}:${ss}`;
       }
 
-      soundButton.addEventListener("click", () => {
-        if (!musicUrl) {
-          window.open(instagramUrl, "_blank", "noopener");
-          return;
-        }
+      function tick() {
+        if (!audio) return;
+        const pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+        progressBar.style.width = pct + "%";
+        thumb.style.left = pct + "%";
+        timeEl.textContent = fmt(audio.currentTime) + (audio.duration ? " / " + fmt(audio.duration) : "");
+        rafId = requestAnimationFrame(tick);
+      }
 
+      function setPlaying(playing) {
+        playBtn.setAttribute("aria-pressed", playing ? "true" : "false");
+        playBtn.classList.toggle("is-playing", playing);
+        playIcon.className = playing ? "ion ion-ios-pause" : "ion ion-ios-play";
+        waveform.classList.toggle("is-playing", playing);
+        if (playing) { rafId = requestAnimationFrame(tick); }
+        else { cancelAnimationFrame(rafId); }
+      }
+
+      playBtn.addEventListener("click", () => {
         if (!audio) {
           audio = new Audio(musicUrl);
-          audio.loop = true;
-          audio.addEventListener("ended", () => {
-            soundButton.classList.remove("is-playing");
-            soundButton.setAttribute("aria-pressed", "false");
+          audio.addEventListener("ended", () => setPlaying(false));
+          audio.addEventListener("error", () => {
+            setPlaying(false);
+            window.open(instagramUrl, "_blank", "noopener");
           });
         }
-
         if (audio.paused) {
-          audio.play().then(() => {
-            soundButton.classList.add("is-playing");
-            soundButton.setAttribute("aria-pressed", "true");
-          }).catch(() => {
+          audio.play().then(() => setPlaying(true)).catch(() => {
             window.open(instagramUrl, "_blank", "noopener");
           });
         } else {
           audio.pause();
-          soundButton.classList.remove("is-playing");
-          soundButton.setAttribute("aria-pressed", "false");
+          setPlaying(false);
         }
+      });
+
+      progressWrap.addEventListener("click", (e) => {
+        if (!audio || !audio.duration) return;
+        const rect = progressWrap.getBoundingClientRect();
+        const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+        audio.currentTime = pct * audio.duration;
+      });
+    }
+
+    // --- Legacy play button (no music_url — opens Instagram) ---
+    const soundButton = instagramPost.querySelector("[data-instagram-sound-toggle]");
+    if (soundButton) {
+      soundButton.addEventListener("click", () => {
+        window.open(instagramUrl, "_blank", "noopener");
       });
     }
   }

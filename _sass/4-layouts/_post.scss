@@ -294,14 +294,146 @@
 
 .instagram-sound-panel {
   display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 10px;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
   margin: 0 auto 28px;
 }
 
-.instagram-sound-button,
+.instagram-player {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 480px;
+  padding: 14px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--background-color);
+}
+
+.instagram-play-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: var(--heading-font-color);
+  color: var(--background-color);
+  cursor: pointer;
+  transition: transform 0.15s, opacity 0.15s;
+
+  i { font-size: 18px; }
+
+  &:hover { transform: scale(1.08); }
+  &:active { transform: scale(0.95); }
+
+  &.is-playing {
+    background: #0f766e;
+  }
+}
+
+.instagram-player-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.instagram-waveform {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 28px;
+
+  span {
+    display: block;
+    width: 3px;
+    border-radius: 2px;
+    background: var(--border-color);
+    transition: background 0.2s;
+  }
+
+  &.is-playing span {
+    background: #0f766e;
+    animation: ig-wave 0.9s ease-in-out infinite;
+
+    @for $i from 1 through 20 {
+      &:nth-child(#{$i}) {
+        animation-delay: #{($i - 1) * 0.06}s;
+      }
+    }
+  }
+}
+
+@keyframes ig-wave {
+  0%, 100% { transform: scaleY(0.4); }
+  50%       { transform: scaleY(1);   }
+}
+
+.instagram-progress-wrap {
+  position: relative;
+  height: 4px;
+  background: var(--border-color);
+  border-radius: 2px;
+  cursor: pointer;
+  overflow: visible;
+
+  &:hover .instagram-progress-thumb { opacity: 1; }
+}
+
+.instagram-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: #0f766e;
+  border-radius: 2px;
+  transition: width 0.25s linear;
+  pointer-events: none;
+}
+
+.instagram-progress-thumb {
+  position: absolute;
+  top: 50%;
+  left: 0%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 12px;
+  background: #0f766e;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.15s, left 0.25s linear;
+  pointer-events: none;
+}
+
+.instagram-time {
+  font-size: 11px;
+  color: var(--text-alt-color, #888);
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
 .instagram-source-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-alt-color, #888);
+  text-decoration: none;
+  opacity: 0.75;
+  transition: opacity 0.15s;
+
+  i { font-size: 15px; }
+  &:hover { opacity: 1; }
+}
+
+// legacy button kept for posts without music_url
+.instagram-sound-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -314,24 +446,11 @@
   line-height: 1;
   color: var(--heading-font-color);
   background: var(--background-color);
-
-  i {
-    margin-right: 7px;
-    font-size: 17px;
-  }
-}
-
-.instagram-sound-button {
   cursor: pointer;
 
-  &.is-playing {
-    border-color: #0f766e;
-    color: #0f766e;
-  }
-}
+  i { margin-right: 7px; font-size: 17px; }
 
-.instagram-source-link {
-  text-decoration: none;
+  &.is-playing { border-color: #0f766e; color: #0f766e; }
 }
 
 .instagram-word-cloud {

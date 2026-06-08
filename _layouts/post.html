@@ -64,13 +64,32 @@ layout: default
 
     {% if is_instagram_post %}
       <div class="instagram-sound-panel" data-instagram-sound>
-        <button class="instagram-sound-button" type="button" data-instagram-sound-toggle aria-pressed="false">
-          <i class="ion ion-md-musical-note" aria-hidden="true"></i>
-          <span>Play post music</span>
-        </button>
+        {% if page.music_url or page.audio %}
+          {% assign _audio_src = page.music_url | default: page.audio %}
+          <div class="instagram-player" data-instagram-player>
+            <button class="instagram-play-btn" type="button" data-instagram-play-toggle aria-label="Play / pause" aria-pressed="false">
+              <i class="ion ion-ios-play" data-play-icon aria-hidden="true"></i>
+            </button>
+            <div class="instagram-player-info">
+              <div class="instagram-waveform" data-instagram-waveform aria-hidden="true">
+                {% for i in (1..20) %}<span style="height:{{ i | modulo: 5 | plus: 2 | times: 4 }}px"></span>{% endfor %}
+              </div>
+              <div class="instagram-progress-wrap" data-instagram-progress-wrap>
+                <div class="instagram-progress-bar" data-instagram-progress></div>
+                <div class="instagram-progress-thumb" data-instagram-thumb></div>
+              </div>
+            </div>
+            <span class="instagram-time" data-instagram-time>0:00</span>
+          </div>
+        {% else %}
+          <button class="instagram-sound-button" type="button" data-instagram-sound-toggle aria-pressed="false">
+            <i class="ion ion-md-musical-note" aria-hidden="true"></i>
+            <span>Play on Instagram</span>
+          </button>
+        {% endif %}
         <a class="instagram-source-link" href="https://www.instagram.com/p/{{ instagram_shortcode }}/" target="_blank" rel="noopener">
           <i class="ion ion-logo-instagram" aria-hidden="true"></i>
-          <span>Open original audio</span>
+          <span>Open on Instagram</span>
         </a>
       </div>
     {% endif %}
