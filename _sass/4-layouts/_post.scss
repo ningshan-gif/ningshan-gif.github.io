@@ -379,7 +379,32 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 6px;
+}
+
+.instagram-track-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.2;
+}
+
+.instagram-track-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--heading-font-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.instagram-track-artist {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-alt-color, #888);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .instagram-waveform {
