@@ -209,12 +209,12 @@
 }
 
 .instagram-post {
-  max-width: 1120px;
+  max-width: 1200px;
 
   .post__content {
     display: grid;
-    grid-template-columns: minmax(240px, 0.8fr) minmax(0, 1.6fr);
-    gap: 36px;
+    grid-template-columns: min(300px, 28%) 1fr;
+    gap: 0;
     align-items: start;
   }
 
@@ -223,75 +223,116 @@
   .post__content > ol,
   .post__content > blockquote {
     grid-column: 1;
-    z-index: 2;
-    margin-bottom: 18px;
-    padding: 0 0 0 18px;
-    border-left: 2px solid var(--border-color);
-    font-size: 18px;
-    line-height: 1.55;
+    position: relative;
+    z-index: 10;
+    margin-bottom: 14px;
+    padding: 14px 18px;
+    border-left: 3px solid #0f766e;
+    border-radius: 0 10px 10px 0;
+    font-size: 17px;
+    line-height: 1.58;
     color: var(--heading-font-color);
+    background: var(--background-color);
+    box-shadow: 0 6px 28px rgba(0, 0, 0, .08);
   }
 
   .post__content > p:last-of-type {
-    position: static;
     padding: 0;
-    border-left: 0;
-    font-size: 14px;
-    color: var(--text-color);
+    border: none;
+    background: none;
+    box-shadow: none;
+    font-size: 13px;
+    opacity: 0.6;
   }
 
   .gallery-box {
     grid-column: 2;
     grid-row: 1 / span 10;
     width: 100%;
-    margin: 0 0 42px;
-    perspective: 1200px;
-    perspective-origin: 50% 42%;
+    margin: -20px 0 42px -20px;
+    perspective: 2000px;
+    perspective-origin: 50% 44%;
+    overflow: visible;
   }
 
+  // JS drives the scene transform — no CSS transition here
   .gallery {
-    --ig-rotate-x: 0deg;
-    --ig-rotate-y: 0deg;
     position: relative;
     display: block;
-    min-height: 760px;
+    min-height: 840px;
     margin: 0;
-    transform: rotateX(var(--ig-rotate-x)) rotateY(var(--ig-rotate-y));
     transform-style: preserve-3d;
-    transition: transform .16s ease-out;
+    will-change: transform;
+
+    // Ambient teal glow that blooms when playing
+    &::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 700px;
+      height: 560px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(20, 184, 166, .18) 0%, rgba(15, 118, 110, .06) 50%, transparent 72%);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 1.4s ease;
+      z-index: 0;
+    }
+
+    &.ig-playing::before { opacity: 1; }
   }
 
+  // JS sets style.transform directly; CSS only handles base appearance + hover lift
   .gallery img {
-    --ig-x: 0px;
-    --ig-y: 0px;
-    --ig-z: 0px;
-    --ig-r: 0deg;
     position: absolute;
     top: 50%;
     left: 50%;
-    width: min(280px, 42vw);
+    width: min(260px, 38vw);
     max-width: none;
-    height: 360px;
+    height: 340px;
     margin: 0;
     object-fit: cover;
-    border: 1px solid rgba(16, 16, 16, .16);
-    border-radius: 8px;
-    box-shadow: 0 24px 70px rgba(0, 0, 0, .2);
+    border-radius: 12px;
+    box-shadow: 0 22px 64px rgba(0, 0, 0, .24), 0 0 0 1px rgba(255, 255, 255, .07);
     cursor: pointer;
-    transform: translate3d(calc(-50% + var(--ig-x)), calc(-50% + var(--ig-y)), var(--ig-z)) rotateZ(var(--ig-r));
-    transition: transform .35s ease, box-shadow .35s ease, filter .35s ease;
+    will-change: transform;
+    transform: translate(-50%, -50%);  // baseline; JS overrides
+    transition: box-shadow .35s ease, filter .35s ease, opacity .4s ease;
     user-select: none;
+    backface-visibility: hidden;
+    z-index: 1;
 
-    &:hover,
-    &:focus {
-      z-index: 5;
-      box-shadow: 0 28px 84px rgba(0, 0, 0, .28);
-      filter: saturate(1.08) contrast(1.03);
-      transform: translate3d(calc(-50% + var(--ig-x)), calc(-50% + var(--ig-y)), calc(var(--ig-z) + 90px)) rotateZ(0deg) scale(1.04);
-    }
+    &:hover { z-index: 20; box-shadow: 0 36px 90px rgba(0, 0, 0, .34); filter: saturate(1.12) brightness(1.05); }
+    &:focus-visible { outline: 3px solid #14b8a6; outline-offset: 4px; }
+    &.ig-focused { z-index: 20; box-shadow: 0 44px 100px rgba(0, 0, 0, .42); filter: saturate(1.18) brightness(1.08); }
+    &.ig-dimmed  { opacity: .28; filter: saturate(.5); z-index: 0; }
   }
 }
 
+// Floating particles
+.ig-particles {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  transform-style: preserve-3d;
+  overflow: visible;
+  z-index: 0;
+}
+
+.ig-particle {
+  --psize: 6px;
+  position: absolute;
+  width: var(--psize);
+  height: var(--psize);
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+// Music panel
 .instagram-sound-panel {
   display: flex;
   flex-direction: column;
@@ -305,11 +346,12 @@
   align-items: center;
   gap: 12px;
   width: 100%;
-  max-width: 480px;
-  padding: 14px 16px;
+  max-width: 440px;
+  padding: 11px 16px;
   border: 1px solid var(--border-color);
-  border-radius: 10px;
+  border-radius: 60px;
   background: var(--background-color);
+  box-shadow: 0 4px 22px rgba(0, 0, 0, .07);
 }
 
 .instagram-play-btn {
@@ -317,23 +359,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   border: none;
   border-radius: 50%;
   background: var(--heading-font-color);
   color: var(--background-color);
   cursor: pointer;
-  transition: transform 0.15s, opacity 0.15s;
+  transition: transform .14s, background .28s;
 
-  i { font-size: 18px; }
-
-  &:hover { transform: scale(1.08); }
-  &:active { transform: scale(0.95); }
-
-  &.is-playing {
-    background: #0f766e;
-  }
+  i { font-size: 17px; margin-left: 2px; }
+  &:hover  { transform: scale(1.1); }
+  &:active { transform: scale(0.92); }
+  &.is-playing { background: #0f766e; i { margin-left: 0; } }
 }
 
 .instagram-player-info {
@@ -341,37 +379,35 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 7px;
 }
 
 .instagram-waveform {
   display: flex;
   align-items: center;
   gap: 3px;
-  height: 28px;
+  height: 24px;
 
   span {
     display: block;
     width: 3px;
     border-radius: 2px;
     background: var(--border-color);
-    transition: background 0.2s;
+    transform-origin: bottom center;
   }
 
   &.is-playing span {
     background: #0f766e;
-    animation: ig-wave 0.9s ease-in-out infinite;
+    animation: ig-wave .85s ease-in-out infinite;
 
     @for $i from 1 through 20 {
-      &:nth-child(#{$i}) {
-        animation-delay: #{($i - 1) * 0.06}s;
-      }
+      &:nth-child(#{$i}) { animation-delay: #{($i - 1) * 0.055}s; }
     }
   }
 }
 
 @keyframes ig-wave {
-  0%, 100% { transform: scaleY(0.4); }
+  0%, 100% { transform: scaleY(.28); }
   50%       { transform: scaleY(1);   }
 }
 
@@ -391,7 +427,6 @@
   width: 0%;
   background: #0f766e;
   border-radius: 2px;
-  transition: width 0.25s linear;
   pointer-events: none;
 }
 
@@ -400,12 +435,12 @@
   top: 50%;
   left: 0%;
   transform: translate(-50%, -50%);
-  width: 12px;
-  height: 12px;
+  width: 11px;
+  height: 11px;
   background: #0f766e;
   border-radius: 50%;
   opacity: 0;
-  transition: opacity 0.15s, left 0.25s linear;
+  transition: opacity .14s;
   pointer-events: none;
 }
 
@@ -425,39 +460,38 @@
   font-weight: 600;
   color: var(--text-alt-color, #888);
   text-decoration: none;
-  opacity: 0.75;
-  transition: opacity 0.15s;
+  opacity: .72;
+  transition: opacity .15s;
 
   i { font-size: 15px; }
   &:hover { opacity: 1; }
 }
 
-// legacy button kept for posts without music_url
 .instagram-sound-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 42px;
-  padding: 10px 14px;
+  padding: 10px 20px;
   border: 1px solid var(--border-color);
-  border-radius: 4px;
+  border-radius: 60px;
   font-size: 13px;
   font-weight: 700;
   line-height: 1;
   color: var(--heading-font-color);
   background: var(--background-color);
   cursor: pointer;
+  transition: border-color .2s, color .2s;
 
-  i { margin-right: 7px; font-size: 17px; }
-
+  i { margin-right: 7px; font-size: 16px; }
   &.is-playing { border-color: #0f766e; color: #0f766e; }
 }
 
 .instagram-word-cloud {
   grid-column: 1 / -1;
   position: relative;
-  min-height: 150px;
-  margin: 4px 0 24px;
+  min-height: 130px;
+  margin: 6px 0 22px;
   overflow: hidden;
   border-top: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
@@ -467,16 +501,24 @@
   --word-x: 50%;
   --word-y: 50%;
   --word-r: 0deg;
+  --word-delay: 0s;
   position: absolute;
   left: var(--word-x);
   top: var(--word-y);
   color: var(--heading-font-color);
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 800;
   line-height: 1;
-  opacity: .82;
+  opacity: .78;
   transform: translate(-50%, -50%) rotate(var(--word-r));
   white-space: nowrap;
+  animation: word-drift 7s ease-in-out infinite;
+  animation-delay: var(--word-delay);
+}
+
+@keyframes word-drift {
+  0%, 100% { transform: translate(-50%, -50%) rotate(var(--word-r)); }
+  50%       { transform: translate(-50%, calc(-50% - 5px)) rotate(calc(var(--word-r) + 1.5deg)); }
 }
 
 @media only screen and (max-width: $desktop) {
@@ -489,62 +531,36 @@
     .post__content > ul,
     .post__content > ol,
     .post__content > blockquote {
-      padding: 0;
-      border-left: 0;
+      background: none;
+      box-shadow: none;
+      padding: 0 0 0 16px;
+      border-left: 2px solid var(--border-color);
+      border-radius: 0;
     }
 
-    .gallery {
-      min-height: 680px;
-    }
-
-    .gallery img {
-      width: min(240px, 54vw);
-      height: 320px;
-    }
+    .gallery-box { margin: 0 0 42px; }
+    .gallery     { min-height: 680px; }
+    .gallery img { width: min(230px, 50vw); height: 300px; }
   }
 }
 
 @media only screen and (max-width: $mobile) {
-  .instagram-post-head {
-    margin-bottom: 20px;
-  }
+  .instagram-post-head { margin-bottom: 20px; }
 
   .instagram-post {
-    .gallery-box {
-      margin-bottom: 32px;
-      overflow: hidden;
-    }
-
-    .gallery {
-      min-height: 560px;
-    }
-
-    .gallery img {
-      width: min(210px, 68vw);
-      height: 280px;
-    }
+    .gallery-box { margin-bottom: 32px; overflow: hidden; }
+    .gallery     { min-height: 540px; }
+    .gallery img { width: min(196px, 64vw); height: 256px; }
   }
 
-  .instagram-word-cloud {
-    min-height: 120px;
-  }
-
-  .instagram-word-cloud span {
-    font-size: 16px;
-  }
+  .instagram-word-cloud { min-height: 110px; }
+  .instagram-word-cloud span { font-size: 15px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .instagram-post {
-    .gallery {
-      transform: none !important;
-      transition: none;
-    }
-
-    .gallery img {
-      transition: none;
-    }
-  }
+  .instagram-post .gallery img { transition: box-shadow .2s, filter .2s, opacity .2s; }
+  .instagram-word-cloud span   { animation: none; }
+  .ig-particle                 { display: none !important; }
 }
 
 /* Share */

@@ -87,161 +87,274 @@ document.addEventListener("DOMContentLoaded", function() {
   })
 
 
-  /* =======================
-  // Instagram 3D posts
-  ======================= */
+  /* ============================================================
+  // Instagram Immersive 3-D Gallery
+  ============================================================ */
   const instagramPost = document.querySelector("[data-instagram-post]");
 
   if (instagramPost) {
-    const gallery = instagramPost.querySelector(".gallery");
-    const galleryImages = gallery ? Array.from(gallery.querySelectorAll("img")) : [];
-    const postContent = instagramPost.querySelector(".post__content");
+    const gallery      = instagramPost.querySelector(".gallery");
+    const galleryImgs  = gallery ? Array.from(gallery.querySelectorAll("img")) : [];
+    const postContent  = instagramPost.querySelector(".post__content");
+    const instagramUrl = instagramPost.dataset.instagramUrl;
+    const REDUCED      = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    galleryImages.forEach((image, index) => {
-      const count = Math.max(galleryImages.length, 1);
-      const angle = (index / count) * Math.PI * 2;
-      const ring = index % 2 === 0 ? 260 : 155;
-      const lift = ((index % 5) - 2) * 34;
-      const depth = ((index % 6) - 2.5) * 44;
-      const rotate = ((index % 7) - 3) * 4;
+    // ── 1. Distribute images on a golden-angle sphere ─────────────────────
+    const GA = Math.PI * (3 - Math.sqrt(5)); // golden angle
+    const imgs = galleryImgs.map((img, i) => {
+      const n     = galleryImgs.length || 1;
+      const theta = i * GA;
+      const phi   = Math.acos(1 - (2 * (i + 0.5)) / n);
+      // ellipsoid radii: wide X, moderate Y, shallow Z
+      const bx = Math.sin(phi) * Math.cos(theta) * 310;
+      const by = Math.cos(phi) * 210;
+      const bz = Math.sin(phi) * Math.sin(theta) * 170;
+      const br = ((theta * 57.3) % 18) - 9;  // -9..+9 deg Z-tilt
 
-      image.classList.add("no-lightense");
-      image.setAttribute("tabindex", "0");
-      image.style.setProperty("--ig-x", `${Math.cos(angle) * ring}px`);
-      image.style.setProperty("--ig-y", `${Math.sin(angle) * (ring * .58) + lift}px`);
-      image.style.setProperty("--ig-z", `${depth}px`);
-      image.style.setProperty("--ig-r", `${rotate}deg`);
+      // Per-image float params (varied so they drift independently)
+      const ph = (i / n) * Math.PI * 2;
+      const ay = 14 + (i % 4) * 6;
+      const ax = 5  + (i % 3) * 3;
+      const spd = 0.32 + (i % 7) * 0.07;
+
+      img.classList.add("no-lightense");
+      img.setAttribute("tabindex", "0");
+      img.dataset.igIndex = i;
+      img.style.transform = `translate3d(calc(-50% + ${bx}px), calc(-50% + ${by}px), ${bz}px) rotateZ(${br}deg)`;
+
+      return { el: img, bx, by, bz, br, ph, ay, ax, spd };
     });
 
-    if (gallery) {
-      let isDragging = false;
+    // ── 2. Particle system ────────────────────────────────────────────────
+    const pWrap = document.createElement("div");
+    pWrap.className = "ig-particles";
+    if (gallery) gallery.appendChild(pWrap);
 
-      const moveSpace = (event) => {
-        const rect = gallery.getBoundingClientRect();
-        const point = event.touches ? event.touches[0] : event;
-        const x = ((point.clientX - rect.left) / rect.width) - .5;
-        const y = ((point.clientY - rect.top) / rect.height) - .5;
+    const PTINTS = ["#14b8a6", "#0d9488", "#5eead4", "#99f6e4", "#fff"];
+    let particles = [];
 
-        gallery.style.setProperty("--ig-rotate-y", `${x * 18}deg`);
-        gallery.style.setProperty("--ig-rotate-x", `${y * -12}deg`);
-      };
-
-      gallery.addEventListener("mousemove", moveSpace);
-      gallery.addEventListener("touchmove", moveSpace, { passive: true });
-      gallery.addEventListener("pointerdown", (event) => {
-        isDragging = true;
-        moveSpace(event);
-      });
-      window.addEventListener("pointermove", (event) => {
-        if (isDragging) moveSpace(event);
-      });
-      window.addEventListener("pointerup", () => {
-        isDragging = false;
-      });
-      gallery.addEventListener("mouseleave", () => {
-        if (!isDragging) {
-          gallery.style.setProperty("--ig-rotate-y", "0deg");
-          gallery.style.setProperty("--ig-rotate-x", "0deg");
-        }
+    function spawnParticle() {
+      if (particles.length >= 28) return;
+      const el = document.createElement("div");
+      el.className = "ig-particle";
+      const sz = 3 + Math.random() * 7;
+      el.style.setProperty("--psize", `${sz}px`);
+      el.style.background = PTINTS[Math.floor(Math.random() * PTINTS.length)];
+      el.style.boxShadow  = `0 0 ${sz * 2}px ${PTINTS[0]}`;
+      pWrap.appendChild(el);
+      particles.push({
+        el, life: 0,
+        maxLife: 80 + Math.random() * 140,
+        x: (Math.random() - 0.5) * 460,
+        y: (Math.random() - 0.5) * 280,
+        z: (Math.random() - 0.5) * 180,
+        vx: (Math.random() - 0.5) * 0.55,
+        vy: -(0.55 + Math.random() * 0.75),
+        vz: (Math.random() - 0.5) * 0.4,
       });
     }
 
+    // ── 3. Animation state ────────────────────────────────────────────────
+    let autoAngle = 0;   // accumulated scene Y-rotation (degrees)
+    let smMouseX  = 0, smMouseY = 0;  // smoothed
+    let rawMouseX = 0, rawMouseY = 0; // raw from pointer
+    let focusIdx  = -1;
+    let isPlaying = false;
+    let lastTs    = 0;
+
+    // ── 4. Pointer tracking ───────────────────────────────────────────────
+    if (gallery) {
+      const onMove = (e) => {
+        const r  = gallery.getBoundingClientRect();
+        const pt = e.touches ? e.touches[0] : e;
+        rawMouseX = (pt.clientX - r.left) / r.width  - 0.5;
+        rawMouseY = (pt.clientY - r.top)  / r.height - 0.5;
+      };
+      gallery.addEventListener("mousemove",  onMove);
+      gallery.addEventListener("touchmove",  onMove, { passive: true });
+      gallery.addEventListener("mouseleave", () => { rawMouseX = rawMouseY = 0; });
+    }
+
+    // ── 5. Image focus on click ───────────────────────────────────────────
+    galleryImgs.forEach((img, i) => {
+      const toggle = () => {
+        focusIdx = focusIdx === i ? -1 : i;
+        galleryImgs.forEach((im, j) => {
+          im.classList.toggle("ig-focused", j === focusIdx);
+          im.classList.toggle("ig-dimmed",  focusIdx !== -1 && j !== focusIdx);
+        });
+      };
+      img.addEventListener("click", toggle);
+      img.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") toggle(); });
+    });
+
+    // ── 6. Main rAF loop ─────────────────────────────────────────────────
+    function raf(ts) {
+      const dt = Math.min((ts - lastTs) / 1000, 0.05);
+      lastTs = ts;
+
+      if (!REDUCED) {
+        // Smooth mouse
+        smMouseX += (rawMouseX - smMouseX) * 0.055;
+        smMouseY += (rawMouseY - smMouseY) * 0.055;
+
+        // Auto-rotate (faster while "playing")
+        autoAngle += dt * (isPlaying ? 11 : 4.5);
+
+        // Scene tilt + slow Y sway
+        const sceneX = smMouseY * -13 + Math.sin(ts / 5500) * 1.8;
+        const sceneY = autoAngle  + smMouseX * 22;
+        if (gallery) gallery.style.transform = `rotateX(${sceneX}deg) rotateY(${sceneY}deg)`;
+
+        // Per-image float + optional beat pulse
+        const t   = ts / 1000;
+        const beat = isPlaying ? Math.sin(t * 5.8) * 0.022 : 0;
+
+        imgs.forEach((d, i) => {
+          let tx, ty, tz, rz, sc;
+          const fy = Math.sin(t * d.spd + d.ph) * d.ay;
+          const fx = Math.cos(t * d.spd * 0.65 + d.ph) * d.ax;
+          const fz = Math.sin(t * d.spd * 0.45 + d.ph + 1.1) * 16;
+          const fr = Math.sin(t * d.spd * 0.35 + d.ph) * 1.4;
+
+          if (focusIdx === i) {
+            tx = 0; ty = 0; tz = 300; rz = 0; sc = 1.18;
+          } else if (focusIdx !== -1) {
+            tx = d.bx + fx; ty = d.by + fy; tz = d.bz + fz - 90; rz = d.br + fr; sc = 0.8;
+          } else {
+            const beatZ = isPlaying ? Math.sin(t * 3.2 + d.ph) * 18 : 0;
+            tx = d.bx + fx; ty = d.by + fy; tz = d.bz + fz + beatZ;
+            rz = d.br + fr; sc = 1 + beat;
+          }
+
+          d.el.style.transform =
+            `translate3d(calc(-50% + ${tx}px), calc(-50% + ${ty}px), ${tz}px) rotateZ(${rz}deg) scale(${sc})`;
+        });
+
+        // Particles (only when playing)
+        if (isPlaying && Math.random() < 0.10) spawnParticle();
+
+        particles = particles.filter(p => {
+          p.life++;
+          if (p.life > p.maxLife) { p.el.remove(); return false; }
+          p.x += p.vx; p.y += p.vy; p.z += p.vz;
+          p.vy *= 0.997;
+          const fade = p.life < 14 ? p.life / 14
+                     : p.life > p.maxLife - 18 ? (p.maxLife - p.life) / 18 : 1;
+          p.el.style.left    = `calc(50% + ${p.x}px)`;
+          p.el.style.top     = `calc(50% + ${p.y}px)`;
+          p.el.style.opacity = (fade * 0.68).toFixed(3);
+          p.el.style.transform = `translateZ(${p.z}px)`;
+          return true;
+        });
+      }
+
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
+    // ── 7. Word cloud ─────────────────────────────────────────────────────
     if (postContent) {
       const cloud = document.createElement("div");
-      const rawWords = postContent.textContent
-        .replace(/https?:\/\/\S+/g, "")
-        .replace(/[@#][^\s]+/g, "")
-        .split(/\s+/)
-        .map((word) => word.replace(/[.,!?;:"'()[\]{}]/g, "").trim())
-        .filter((word) => word.length > 3)
-        .slice(0, 18);
-      const words = rawWords.length ? rawWords : ["sleepychunk", "memory", "image", "song"];
-
-      words.forEach((word, index) => {
+      const rawW = postContent.textContent
+        .replace(/https?:\/\/\S+/g, "").replace(/[@#][^\s]+/g, "")
+        .split(/\s+/).map(w => w.replace(/[.,!?;:"'()[\]{}]/g, "").trim())
+        .filter(w => w.length > 3).slice(0, 18);
+      const words = rawW.length ? rawW : ["sleepychunk", "memory", "image", "song"];
+      words.forEach((w, i) => {
         const chip = document.createElement("span");
-        chip.textContent = word;
-        chip.style.setProperty("--word-x", `${8 + ((index * 29) % 84)}%`);
-        chip.style.setProperty("--word-y", `${18 + ((index * 17) % 64)}%`);
-        chip.style.setProperty("--word-r", `${((index % 7) - 3) * 5}deg`);
+        chip.textContent = w;
+        chip.style.setProperty("--word-x",     `${8  + ((i * 29) % 84)}%`);
+        chip.style.setProperty("--word-y",     `${18 + ((i * 17) % 64)}%`);
+        chip.style.setProperty("--word-r",     `${((i % 7) - 3) * 5}deg`);
+        chip.style.setProperty("--word-delay", `${(i * 0.45) % 7}s`);
         cloud.appendChild(chip);
       });
-
       cloud.className = "instagram-word-cloud";
       postContent.appendChild(cloud);
     }
 
-    const musicUrl = instagramPost.dataset.musicUrl;
-    const instagramUrl = instagramPost.dataset.instagramUrl;
+    // ── 8. Music player ───────────────────────────────────────────────────
+    function setPlaying(on) {
+      isPlaying = on;
+      if (gallery) gallery.classList.toggle("ig-playing", on);
+    }
 
-    // --- Rich interactive player (when music_url is set) ---
     const player = instagramPost.querySelector("[data-instagram-player]");
     if (player) {
-      const playBtn = player.querySelector("[data-instagram-play-toggle]");
-      const playIcon = player.querySelector("[data-play-icon]");
-      const waveform = player.querySelector("[data-instagram-waveform]");
-      const progressWrap = player.querySelector("[data-instagram-progress-wrap]");
-      const progressBar = player.querySelector("[data-instagram-progress]");
-      const thumb = player.querySelector("[data-instagram-thumb]");
-      const timeEl = player.querySelector("[data-instagram-time]");
-      let audio = null;
-      let rafId = null;
+      const playBtn   = player.querySelector("[data-instagram-play-toggle]");
+      const playIcon  = player.querySelector("[data-play-icon]");
+      const waveform  = player.querySelector("[data-instagram-waveform]");
+      const progWrap  = player.querySelector("[data-instagram-progress-wrap]");
+      const progBar   = player.querySelector("[data-instagram-progress]");
+      const thumb     = player.querySelector("[data-instagram-thumb]");
+      const timeEl    = player.querySelector("[data-instagram-time]");
+      let audio = null, tickId = null;
 
-      function fmt(s) {
+      const fmt = s => {
         const m = Math.floor(s / 60);
-        const ss = String(Math.floor(s % 60)).padStart(2, "0");
-        return `${m}:${ss}`;
-      }
+        return `${m}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+      };
 
-      function tick() {
+      const tick = () => {
         if (!audio) return;
         const pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
-        progressBar.style.width = pct + "%";
-        thumb.style.left = pct + "%";
-        timeEl.textContent = fmt(audio.currentTime) + (audio.duration ? " / " + fmt(audio.duration) : "");
-        rafId = requestAnimationFrame(tick);
-      }
+        progBar.style.width = pct + "%";
+        thumb.style.left    = pct + "%";
+        timeEl.textContent  = fmt(audio.currentTime) + (audio.duration ? " / " + fmt(audio.duration) : "");
+        tickId = requestAnimationFrame(tick);
+      };
 
-      function setPlaying(playing) {
-        playBtn.setAttribute("aria-pressed", playing ? "true" : "false");
-        playBtn.classList.toggle("is-playing", playing);
-        playIcon.className = playing ? "ion ion-ios-pause" : "ion ion-ios-play";
-        waveform.classList.toggle("is-playing", playing);
-        if (playing) { rafId = requestAnimationFrame(tick); }
-        else { cancelAnimationFrame(rafId); }
-      }
+      const setUI = (on) => {
+        playBtn.setAttribute("aria-pressed", on ? "true" : "false");
+        playBtn.classList.toggle("is-playing", on);
+        playIcon.className = on ? "ion ion-ios-pause" : "ion ion-ios-play";
+        waveform.classList.toggle("is-playing", on);
+        setPlaying(on);
+        if (on) { tickId = requestAnimationFrame(tick); }
+        else { cancelAnimationFrame(tickId); }
+      };
 
       playBtn.addEventListener("click", () => {
+        // musicUrl is an Instagram page link — try to play; on error open IG + enable visual mode
         if (!audio) {
-          audio = new Audio(musicUrl);
-          audio.addEventListener("ended", () => setPlaying(false));
+          audio = new Audio(instagramPost.dataset.musicUrl);
+          audio.addEventListener("ended", () => setUI(false));
           audio.addEventListener("error", () => {
-            setPlaying(false);
-            window.open(instagramUrl, "_blank", "noopener");
+            setUI(false); // reset button
           });
         }
         if (audio.paused) {
-          audio.play().then(() => setPlaying(true)).catch(() => {
-            window.open(instagramUrl, "_blank", "noopener");
-          });
+          audio.play()
+            .then(() => setUI(true))
+            .catch(() => {
+              // Can't autoplay → just enable visuals + open Instagram
+              setPlaying(!isPlaying);
+              playBtn.classList.toggle("is-playing", isPlaying);
+              playIcon.className = isPlaying ? "ion ion-ios-pause" : "ion ion-ios-play";
+              waveform.classList.toggle("is-playing", isPlaying);
+              if (isPlaying) window.open(instagramUrl, "_blank", "noopener noreferrer");
+            });
         } else {
           audio.pause();
-          setPlaying(false);
+          setUI(false);
         }
       });
 
-      progressWrap.addEventListener("click", (e) => {
+      progWrap.addEventListener("click", e => {
         if (!audio || !audio.duration) return;
-        const rect = progressWrap.getBoundingClientRect();
-        const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-        audio.currentTime = pct * audio.duration;
+        const r = progWrap.getBoundingClientRect();
+        audio.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * audio.duration;
       });
     }
 
-    // --- Legacy play button (no music_url — opens Instagram) ---
-    const soundButton = instagramPost.querySelector("[data-instagram-sound-toggle]");
-    if (soundButton) {
-      soundButton.addEventListener("click", () => {
-        window.open(instagramUrl, "_blank", "noopener");
+    // Legacy sound button (posts without music_url → opens Instagram directly)
+    const soundBtn = instagramPost.querySelector("[data-instagram-sound-toggle]");
+    if (soundBtn) {
+      soundBtn.addEventListener("click", () => {
+        setPlaying(!isPlaying);
+        soundBtn.classList.toggle("is-playing", isPlaying);
+        if (isPlaying) window.open(instagramUrl, "_blank", "noopener noreferrer");
       });
     }
   }
