@@ -302,7 +302,7 @@
     transform: translate(-50%, -50%);  // baseline; JS overrides
     transition: box-shadow .35s ease, filter .35s ease, opacity .4s ease;
     user-select: none;
-    backface-visibility: hidden;
+    backface-visibility: visible;
     z-index: 1;
 
     &:hover { z-index: 20; box-shadow: 0 36px 90px rgba(0, 0, 0, .34); filter: saturate(1.12) brightness(1.05); }
@@ -337,7 +337,7 @@
   align-items: center;
   justify-content: center;
   will-change: transform;
-  backface-visibility: hidden;
+  backface-visibility: visible;
 
   &::after {
     content: '';
