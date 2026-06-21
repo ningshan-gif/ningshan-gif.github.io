@@ -285,7 +285,8 @@
   }
 
   // JS sets style.transform directly; CSS only handles base appearance + hover lift
-  .gallery img {
+  .gallery img,
+  .gallery video {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -308,6 +309,62 @@
     &:focus-visible { outline: 3px solid #14b8a6; outline-offset: 4px; }
     &.ig-focused { z-index: 20; box-shadow: 0 44px 100px rgba(0, 0, 0, .42); filter: saturate(1.18) brightness(1.08); }
     &.ig-dimmed  { opacity: .28; filter: saturate(.5); z-index: 0; }
+  }
+
+  .gallery video {
+    background: #000;
+    // When focused, show native controls — let them breathe
+    &.ig-focused { height: auto; min-height: 340px; max-height: 520px; }
+  }
+}
+
+// Small ▶ badge that floats in 3-D space over its video node.
+// JS drives the transform to match the video's exact position.
+.ig-video-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 42px;
+  height: 42px;
+  // The baseline translate matches .gallery video so it overlays correctly before the first rAF tick
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 6;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, .56);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform;
+  backface-visibility: hidden;
+
+  &::after {
+    content: '';
+    display: block;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 8px 0 8px 16px;
+    border-color: transparent transparent transparent rgba(255, 255, 255, .92);
+    margin-left: 4px;
+  }
+}
+
+// YouTube embed in the sound panel
+.instagram-youtube-embed {
+  width: 100%;
+  margin-bottom: 16px;
+  border-radius: 10px;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  background: #000;
+
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
   }
 }
 
@@ -565,7 +622,7 @@
 
     .gallery-box { margin: 0 0 42px; }
     .gallery     { min-height: 680px; }
-    .gallery img { width: min(230px, 50vw); height: 300px; }
+    .gallery img, .gallery video { width: min(230px, 50vw); height: 300px; }
   }
 }
 
@@ -575,7 +632,7 @@
   .instagram-post {
     .gallery-box { margin-bottom: 32px; overflow: hidden; }
     .gallery     { min-height: 540px; }
-    .gallery img { width: min(196px, 64vw); height: 256px; }
+    .gallery img, .gallery video { width: min(196px, 64vw); height: 256px; }
   }
 
   .instagram-word-cloud { min-height: 110px; }
@@ -583,7 +640,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .instagram-post .gallery img { transition: box-shadow .2s, filter .2s, opacity .2s; }
+  .instagram-post .gallery img,
+  .instagram-post .gallery video { transition: box-shadow .2s, filter .2s, opacity .2s; }
   .instagram-word-cloud span   { animation: none; }
   .ig-particle                 { display: none !important; }
 }

@@ -94,40 +94,40 @@ document.addEventListener("DOMContentLoaded", function() {
 
   if (instagramPost) {
     const gallery      = instagramPost.querySelector(".gallery");
-    const galleryImgs  = gallery ? Array.from(gallery.querySelectorAll("img")) : [];
+    // Select both images AND videos so scraped reels appear in the sphere
+    const galleryMedia = gallery ? Array.from(gallery.querySelectorAll("img, video")) : [];
     const postContent  = instagramPost.querySelector(".post__content");
     const instagramUrl = instagramPost.dataset.instagramUrl;
     const REDUCED      = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // ── 1. Distribute images across clusters — max 6 per cluster ─────────
-    //    Each cluster uses the original golden-angle sphere shape the user liked.
-    const n = galleryImgs.length || 1;
-    const MAX_PER = 6;
-    const numClusters = Math.ceil(n / MAX_PER);
+    // ── 1. Distribute media across clusters — max 5 per cluster, max 3 clusters ──
+    //    Cap at 15 items so the sphere stays readable; extras stay hidden in post body.
+    const MAX_SHOWN   = 15;
+    const MAX_PER     = 5;
+    const MAX_CLUSTERS = 3;
+    const visibleMedia = galleryMedia.slice(0, MAX_SHOWN);
+    const n = visibleMedia.length || 1;
+    const numClusters = Math.min(MAX_CLUSTERS, Math.ceil(n / MAX_PER));
 
-    // Cluster centers spread through 3D space so each orb is clearly distinct.
-    // Z offset staggers depth so clusters don't visually merge during rotation.
+    // Cluster centers — spread far apart so each orb is clearly distinct.
     const CENTERS = [
       { cx:    0, cy:   0, cz:    0 },   // 1 – center
-      { cx: -250, cy: -50, cz:  130 },   // 2 – left-front
-      { cx:  250, cy: -50, cz: -130 },   // 3 – right-back
-      { cx:    0, cy:  200, cz:   80 },  // 4 – bottom-front
-      { cx: -250, cy:  200, cz: -80 },   // 5 – bottom-left-back
-      { cx:  250, cy:  200, cz:  80 },   // 6 – bottom-right-front
+      { cx: -360, cy: -60, cz:  160 },   // 2 – left-front
+      { cx:  360, cy: -60, cz: -160 },   // 3 – right-back
     ];
 
-    // Single cluster: keep the original large ellipsoid the user liked.
-    // Multi-cluster: scale down so each orb is self-contained and readable.
-    const RX = numClusters === 1 ? 310 : 210;
-    const RY = numClusters === 1 ? 210 : 145;
-    const RZ = numClusters === 1 ? 170 : 115;
+    // Single cluster: larger ellipsoid. Multi-cluster: tighter so they don't overlap.
+    const RX = numClusters === 1 ? 310 : 180;
+    const RY = numClusters === 1 ? 210 : 125;
+    const RZ = numClusters === 1 ? 170 : 100;
     const GA = Math.PI * (3 - Math.sqrt(5)); // golden angle
 
-    const imgs = galleryImgs.map((img, i) => {
-      const ci = Math.floor(i / MAX_PER);
-      const li = i % MAX_PER;
-      const lc = Math.min(MAX_PER, n - ci * MAX_PER);
-      const cc = CENTERS[Math.min(ci, CENTERS.length - 1)];
+    const mediaNodes = visibleMedia.map((el, i) => {
+      const ci  = Math.min(Math.floor(i / MAX_PER), MAX_CLUSTERS - 1);
+      const li  = i % MAX_PER;
+      const lc  = Math.min(MAX_PER, n - ci * MAX_PER);
+      const cc  = CENTERS[ci];
+      const isVid = el.tagName === "VIDEO";
 
       // Golden-angle sphere distribution within each cluster
       const theta = li * GA;
@@ -135,25 +135,36 @@ document.addEventListener("DOMContentLoaded", function() {
       const lx = Math.sin(phi) * Math.cos(theta) * RX;
       const ly = Math.cos(phi) * RY;
       const lz = Math.sin(phi) * Math.sin(theta) * RZ;
-      const lr = ((theta * 57.3) % 18) - 9;  // -9..+9 deg Z-tilt (original range)
+      const lr = ((theta * 57.3) % 18) - 9;
 
       const bx = cc.cx + lx;
       const by = cc.cy + ly;
       const bz = cc.cz + lz;
 
-      // Per-image float params (varied so they drift independently)
       const ph  = (i / n) * Math.PI * 2;
       const ay  = 14 + (i % 4) * 6;
       const ax  = 5  + (i % 3) * 3;
       const spd = 0.32 + (i % 7) * 0.07;
 
-      img.classList.add("no-lightense");
-      img.setAttribute("tabindex", "0");
-      img.dataset.igIndex   = i;
-      img.dataset.igCluster = ci;
-      img.style.transform   = `translate3d(calc(-50% + ${bx}px), calc(-50% + ${by}px), ${bz}px) rotateZ(${lr}deg)`;
+      el.classList.add("no-lightense");
+      el.setAttribute("tabindex", "0");
+      el.dataset.igIndex   = i;
+      el.dataset.igCluster = ci;
+      el.style.transform   = `translate3d(calc(-50% + ${bx}px), calc(-50% + ${by}px), ${bz}px) rotateZ(${lr}deg)`;
 
-      return { el: img, bx, by, bz, br: lr, ph, ay, ax, spd, ci };
+      // Videos muted in sphere; unmuted only when focused
+      let badge = null;
+      if (isVid) {
+        el.muted = true;
+        el.loop  = true;
+        // Inject a ▶ badge that we'll move in the rAF loop to match the video
+        badge = document.createElement("span");
+        badge.className = "ig-video-badge";
+        badge.setAttribute("aria-hidden", "true");
+        el.insertAdjacentElement("afterend", badge);
+      }
+
+      return { el, badge, bx, by, bz, br: lr, ph, ay, ax, spd, ci, isVid };
     });
 
     // ── 2. Particle system ────────────────────────────────────────────────
@@ -186,9 +197,9 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // ── 3. Animation state ────────────────────────────────────────────────
-    let autoAngle = 0;   // accumulated scene Y-rotation (degrees)
-    let smMouseX  = 0, smMouseY = 0;  // smoothed
-    let rawMouseX = 0, rawMouseY = 0; // raw from pointer
+    let autoAngle = 0;
+    let smMouseX  = 0, smMouseY = 0;
+    let rawMouseX = 0, rawMouseY = 0;
     let focusIdx  = -1;
     let isPlaying = false;
     let lastTs    = 0;
@@ -206,17 +217,36 @@ document.addEventListener("DOMContentLoaded", function() {
       gallery.addEventListener("mouseleave", () => { rawMouseX = rawMouseY = 0; });
     }
 
-    // ── 5. Image focus on click ───────────────────────────────────────────
-    galleryImgs.forEach((img, i) => {
+    // ── 5. Media focus on click ───────────────────────────────────────────
+    mediaNodes.forEach(({ el, isVid }, i) => {
       const toggle = () => {
-        focusIdx = focusIdx === i ? -1 : i;
-        galleryImgs.forEach((im, j) => {
-          im.classList.toggle("ig-focused", j === focusIdx);
-          im.classList.toggle("ig-dimmed",  focusIdx !== -1 && j !== focusIdx);
+        const opening = focusIdx !== i;
+        focusIdx = opening ? i : -1;
+
+        mediaNodes.forEach(({ el: mel, isVid: mv }, j) => {
+          mel.classList.toggle("ig-focused", j === focusIdx);
+          mel.classList.toggle("ig-dimmed",  focusIdx !== -1 && j !== focusIdx);
+
+          // Pause all videos that are no longer focused
+          if (mv && j !== focusIdx) {
+            mel.muted = true;
+            mel.pause();
+          }
         });
+
+        // If we just opened a video, play it (unmuted, with controls)
+        if (opening && isVid) {
+          el.muted = false;
+          el.controls = true;
+          el.play().catch(() => { el.muted = true; el.play(); });
+        } else if (!opening && isVid) {
+          el.controls = false;
+          el.muted = true;
+          el.pause();
+        }
       };
-      img.addEventListener("click", toggle);
-      img.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") toggle(); });
+      el.addEventListener("click",   toggle);
+      el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") toggle(); });
     });
 
     // ── 6. Main rAF loop ─────────────────────────────────────────────────
@@ -225,23 +255,19 @@ document.addEventListener("DOMContentLoaded", function() {
       lastTs = ts;
 
       if (!REDUCED) {
-        // Smooth mouse
         smMouseX += (rawMouseX - smMouseX) * 0.055;
         smMouseY += (rawMouseY - smMouseY) * 0.055;
 
-        // Auto-rotate (faster while "playing")
         autoAngle += dt * (isPlaying ? 11 : 4.5);
 
-        // Scene tilt + slow Y sway
         const sceneX = smMouseY * -13 + Math.sin(ts / 5500) * 1.8;
         const sceneY = autoAngle  + smMouseX * 22;
         if (gallery) gallery.style.transform = `rotateX(${sceneX}deg) rotateY(${sceneY}deg)`;
 
-        // Per-image float + optional beat pulse
-        const t   = ts / 1000;
+        const t    = ts / 1000;
         const beat = isPlaying ? Math.sin(t * 5.8) * 0.022 : 0;
 
-        imgs.forEach((d, i) => {
+        mediaNodes.forEach((d, i) => {
           let tx, ty, tz, rz, sc;
           const fy = Math.sin(t * d.spd + d.ph) * d.ay;
           const fx = Math.cos(t * d.spd * 0.65 + d.ph) * d.ax;
@@ -249,7 +275,7 @@ document.addEventListener("DOMContentLoaded", function() {
           const fr = Math.sin(t * d.spd * 0.35 + d.ph) * 1.4;
 
           if (focusIdx === i) {
-            tx = 0; ty = 0; tz = 300; rz = 0; sc = 1.18;
+            tx = 0; ty = 0; tz = 320; rz = 0; sc = 1.18;
           } else if (focusIdx !== -1) {
             tx = d.bx + fx; ty = d.by + fy; tz = d.bz + fz - 90; rz = d.br + fr; sc = 0.8;
           } else {
@@ -258,11 +284,15 @@ document.addEventListener("DOMContentLoaded", function() {
             rz = d.br + fr; sc = 1 + beat;
           }
 
-          d.el.style.transform =
-            `translate3d(calc(-50% + ${tx}px), calc(-50% + ${ty}px), ${tz}px) rotateZ(${rz}deg) scale(${sc})`;
+          const xf = `translate3d(calc(-50% + ${tx}px), calc(-50% + ${ty}px), ${tz}px) rotateZ(${rz}deg) scale(${sc})`;
+          d.el.style.transform = xf;
+          // Move the ▶ badge to the same 3D position as its video
+          if (d.badge) {
+            d.badge.style.transform = xf;
+            d.badge.style.visibility = (focusIdx === i) ? "hidden" : "visible";
+          }
         });
 
-        // Particles (only when playing)
         if (isPlaying && Math.random() < 0.10) spawnParticle();
 
         particles = particles.filter(p => {
@@ -347,19 +377,15 @@ document.addEventListener("DOMContentLoaded", function() {
       };
 
       playBtn.addEventListener("click", () => {
-        // musicUrl is an Instagram page link — try to play; on error open IG + enable visual mode
         if (!audio) {
           audio = new Audio(instagramPost.dataset.musicUrl);
           audio.addEventListener("ended", () => setUI(false));
-          audio.addEventListener("error", () => {
-            setUI(false); // reset button
-          });
+          audio.addEventListener("error", () => { setUI(false); });
         }
         if (audio.paused) {
           audio.play()
             .then(() => setUI(true))
             .catch(() => {
-              // Can't autoplay → just enable visuals + open Instagram
               setPlaying(!isPlaying);
               playBtn.classList.toggle("is-playing", isPlaying);
               playIcon.className = isPlaying ? "ion ion-ios-pause" : "ion ion-ios-play";

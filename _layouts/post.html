@@ -64,6 +64,30 @@ layout: default
 
     {% if is_instagram_post %}
       <div class="instagram-sound-panel" data-instagram-sound>
+
+        {% if page.youtube_url %}
+          {% comment %} Normalise youtube_url to embed form {% endcomment %}
+          {% assign yt_raw = page.youtube_url %}
+          {% if yt_raw contains "youtu.be/" %}
+            {% assign yt_id = yt_raw | split: "youtu.be/" | last | split: "?" | first %}
+          {% elsif yt_raw contains "watch?v=" %}
+            {% assign yt_id = yt_raw | split: "watch?v=" | last | split: "&" | first %}
+          {% elsif yt_raw contains "embed/" %}
+            {% assign yt_id = yt_raw | split: "embed/" | last | split: "?" | first %}
+          {% else %}
+            {% assign yt_id = yt_raw %}
+          {% endif %}
+          <div class="instagram-youtube-embed">
+            <iframe
+              src="https://www.youtube.com/embed/{{ yt_id }}?rel=0"
+              title="{% if page.music_title %}{{ page.music_title }}{% else %}Music{% endif %}"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+              loading="lazy"
+            ></iframe>
+          </div>
+        {% endif %}
+
         {% if page.music_url or page.audio %}
           <div class="instagram-player" data-instagram-player>
             <button class="instagram-play-btn" type="button" data-instagram-play-toggle aria-label="Play / pause" aria-pressed="false">
@@ -86,12 +110,13 @@ layout: default
             </div>
             <span class="instagram-time" data-instagram-time>0:00</span>
           </div>
-        {% else %}
+        {% elsif page.youtube_url == nil %}
           <button class="instagram-sound-button" type="button" data-instagram-sound-toggle aria-pressed="false">
             <i class="ion ion-md-musical-note" aria-hidden="true"></i>
             <span>Open on Instagram</span>
           </button>
         {% endif %}
+
         <a class="instagram-source-link" href="https://www.instagram.com/p/{{ instagram_shortcode }}/" target="_blank" rel="noopener">
           <i class="ion ion-logo-instagram" aria-hidden="true"></i>
           <span>View on Instagram</span>
