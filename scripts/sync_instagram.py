@@ -128,6 +128,26 @@ def sync():
         cap = caption_text(node)
         short_cap = cap[:120].replace("\n", " ")
 
+        # Capture attached-music attribution when Instagram exposes it (reels).
+        # The room resolves these names to playable previews client-side.
+        music  = node.get("clips_music_attribution_info") or {}
+        song   = (music.get("song_name") or "").strip()
+        artist = (music.get("artist_name") or "").strip()
+        if song and song.lower() != "original audio":
+            music_path = os.path.join(REPO_DIR, "_data", "post_music.yml")
+            try:
+                with open(music_path, encoding="utf-8") as f:
+                    music_map = yaml.safe_load(f) or {}
+            except FileNotFoundError:
+                music_map = {}
+            if not isinstance(music_map, dict):
+                music_map = {}
+            if shortcode not in music_map:
+                music_map[shortcode] = f"{song} {artist}".strip()
+                with open(music_path, "w", encoding="utf-8") as f:
+                    yaml.safe_dump(music_map, f, allow_unicode=True, sort_keys=True)
+                print(f"  ♪ music: {song} — {artist}")
+
         # Download all media items
         items   = media_items(node)
         gallery = []   # list of dicts: {html_tag, src}

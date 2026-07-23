@@ -37,6 +37,9 @@ const BASE_HINT = IS_TOUCH
 const VIEWER_HINT = IS_TOUCH
   ? 'tap the photo for the next one · tap away to close'
   : '← → to browse · esc or click away to close';
+const WRITING_HINT = IS_TOUCH
+  ? 'tap the right page to turn · left page goes back · tap away to close'
+  : '← → or click a page to turn it · esc closes';
 if (hint) hint.textContent = BASE_HINT;
 
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -100,8 +103,9 @@ place(buildGuitar(THREE), -4.9, -4.6, 0.72);
 place(buildFruits(THREE), 4.9, 0.7, 0);
 place(buildDog(THREE), -1.15, 1.95, -0.22);
 
-// Optional modules (drums, plants) — the room still works while they don't exist yet.
-Promise.allSettled([import('./drums.js'), import('./plants.js')]).then(([d, p]) => {
+// Optional modules (drums, plants, art) — the room still works while they don't exist yet.
+Promise.allSettled([import('./drums.js'), import('./plants.js'), import('./art.js')]).then(([d, p, a]) => {
+  if (a.status === 'fulfilled') place(a.value.buildArt(THREE), 0, 0, 0);
   if (d.status === 'fulfilled') place(d.value.buildDrums(THREE), -3.35, -4.65, 0.5);
   if (p.status === 'fulfilled') {
     const set = p.value.buildPlants(THREE);
@@ -161,6 +165,28 @@ function makePaperTexture(lines) {
   tex.colorSpace = THREE.SRGBColorSpace;
   return tex;
 }
+// small gold ♪ badge for frames whose post carries a tune
+const noteTex = (() => {
+  const c = document.createElement('canvas');
+  c.width = c.height = 64;
+  const g = c.getContext('2d');
+  g.beginPath();
+  g.arc(32, 32, 28, 0, Math.PI * 2);
+  g.fillStyle = 'rgba(26,15,7,0.78)';
+  g.fill();
+  g.strokeStyle = 'rgba(255,217,160,0.8)';
+  g.lineWidth = 3;
+  g.stroke();
+  g.fillStyle = '#ffd9a0';
+  g.font = '600 34px Georgia, serif';
+  g.fillText('♪', 17, 44);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+})();
+const noteMat = new THREE.MeshBasicMaterial({ map: noteTex, transparent: true });
+const noteGeom = new THREE.PlaneGeometry(0.11, 0.11);
+
 const placeholderTex = makePaperTexture(false);
 const placeholderMat = new THREE.MeshStandardMaterial({
   map: placeholderTex, roughness: 0.9, emissive: 0xffffff, emissiveMap: placeholderTex, emissiveIntensity: 0.25,
@@ -197,6 +223,12 @@ function addCard(post, shape) {
   mat.userData.cardIndex = idx;
   photo.userData.cardIndex = idx;
   root.add(back, mat, photo);
+  if (hasTuneFor(post)) {
+    const note = new THREE.Mesh(noteGeom, noteMat);
+    note.position.set(fw / 2 - 0.1, -(fh / 2) + 0.1, 0.022);
+    note.userData.cardIndex = idx;
+    root.add(note);
+  }
   cardsGroup.add(root);
   const baseScale = 0.9 + hash01(idx + 77) * 0.12;
   root.scale.setScalar(baseScale);
@@ -280,6 +312,35 @@ function galleryOf(post) {
 function musicFor(post) {
   const sc = shortcodeOf(post);
   return sc && AUDIO_SHORTCODES.has(sc) ? '/audio/' + sc + '.mp3' : null;
+}
+
+// songs named in _data/post_music.yml, resolved to ~30s iTunes previews on demand
+const MUSIC_QUERIES = {};
+const previewCache = new Map();
+
+function musicQueryFor(post) {
+  const sc = shortcodeOf(post);
+  return (sc && MUSIC_QUERIES[sc]) || null;
+}
+
+function hasTuneFor(post) {
+  return !!(musicFor(post) || musicQueryFor(post));
+}
+
+function playMusicQuery(q, gen) {
+  const hit = previewCache.get(q);
+  if (hit) {
+    if (hit.url) playMusic(hit.url);
+    return;
+  }
+  fetch('https://itunes.apple.com/search?media=music&limit=1&term=' + encodeURIComponent(q))
+    .then(r => r.json())
+    .then(d => {
+      const url = (d.results && d.results[0] && d.results[0].previewUrl) || null;
+      previewCache.set(q, { url });
+      if (url && viewerState.active && gen === viewerGen) playMusic(url);
+    })
+    .catch(() => { /* stay quiet */ });
 }
 
 function isWriting(post) {
@@ -398,6 +459,7 @@ fetch('/room-posts.json')
   .then(data => {
     const posts = data.posts || data; // tolerate the old flat-array shape
     (data.audio || []).forEach(sc => AUDIO_SHORTCODES.add(sc));
+    Object.assign(MUSIC_QUERIES, data.music || {});
     buildGalleryMap(data.gallery || []);
     // newest first; every post hangs on a wall (zone capacity >= post count)
     posts.sort((a, b) => (b.ts || 0) - (a.ts || 0));
@@ -488,7 +550,9 @@ renderer.domElement.addEventListener('pointermove', (e) => {
     tip.style.left = (e.clientX + 14) + 'px';
     tip.style.top = (e.clientY + 14) + 'px';
     const cap = captionOf(hovered.post);
-    const label = cap || (musicFor(hovered.post) ? '♪ click to listen' : (hovered.post.date || ''));
+    const hasTune = hasTuneFor(hovered.post);
+    const label = cap ? (hasTune ? '♪ ' + cap : cap)
+      : (hasTune ? '♪ click to listen' : (hovered.post.date || ''));
     tip.innerHTML = '<strong>' + escapeHtml(label) + '</strong><span>' +
       escapeHtml(hovered.post.date || '') + '</span>';
   } else if (tip) {
@@ -500,10 +564,17 @@ renderer.domElement.addEventListener('pointerdown', (e) => { downX = e.clientX; 
 renderer.domElement.addEventListener('pointerup', (e) => {
   if (Math.hypot(e.clientX - downX, e.clientY - downY) > 6) return; // was a drag
   if (viewerState.active) {
-    // tap a companion -> bring it to front; tap the big photo -> next post; elsewhere -> close
     pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
     pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
     raycaster.setFromCamera(pointer, camera);
+    if (book.active) {
+      // right page turns forward, left page turns back, elsewhere closes
+      if (raycaster.intersectObjects([pageR, turnFront], false).length) flipBook(1);
+      else if (raycaster.intersectObjects([pageL, turnBack], false).length) flipBook(-1);
+      else viewerClose();
+      return;
+    }
+    // tap a companion -> bring it to front; tap the big photo -> next post; elsewhere -> close
     const active = [];
     for (const comp of companions) if (comp.active) active.push(comp.photo);
     const compHits = raycaster.intersectObjects(active, false);
@@ -588,6 +659,238 @@ const fullTexCache = new Map();
 let viewerGen = 0;
 let viewerAspect = 1;
 let mainW = 1.4, mainH = 1.4;
+
+// ---------- the book: writings open as an old flippable manuscript ----------
+const PAGE_W = 0.72, PAGE_H = 0.98;
+const bookGroup = new THREE.Group();
+bookGroup.visible = false;
+bookGroup.rotation.x = -0.1; // lecturn tilt
+viewerPanel.add(bookGroup);
+
+const bookMats = [];
+function bookBasic(extra) {
+  const m = new THREE.MeshBasicMaterial(Object.assign(
+    { transparent: true, opacity: 0, depthTest: false, depthWrite: false }, extra));
+  bookMats.push(m);
+  return m;
+}
+const coverMat = bookBasic({ color: 0x4a3020 });
+const cover = new THREE.Mesh(new THREE.PlaneGeometry(PAGE_W * 2 + 0.09, PAGE_H + 0.07), coverMat);
+cover.position.z = -0.012;
+cover.renderOrder = 21;
+bookGroup.add(cover);
+
+const pageGeom = new THREE.PlaneGeometry(PAGE_W, PAGE_H);
+const pageLMat = bookBasic({ color: 0xffffff });
+const pageL = new THREE.Mesh(pageGeom, pageLMat);
+pageL.position.set(-PAGE_W / 2, 0, 0);
+pageL.renderOrder = 22;
+bookGroup.add(pageL);
+const pageRMat = bookBasic({ color: 0xffffff });
+const pageR = new THREE.Mesh(pageGeom, pageRMat);
+pageR.position.set(PAGE_W / 2, 0, 0);
+pageR.renderOrder = 22;
+bookGroup.add(pageR);
+
+// the turning leaf pivots at the spine; front and back faces carry different
+// pages. Segmented geometry so the paper CURLS while it turns.
+const TURN_SEGS = 18;
+const turnGeomF = new THREE.PlaneGeometry(PAGE_W, PAGE_H, TURN_SEGS, 1);
+const turnGeomB = new THREE.PlaneGeometry(PAGE_W, PAGE_H, TURN_SEGS, 1);
+const turnGroup = new THREE.Group();
+turnGroup.position.z = 0.004;
+bookGroup.add(turnGroup);
+const turnFrontMat = bookBasic({ color: 0xffffff });
+const turnFront = new THREE.Mesh(turnGeomF, turnFrontMat);
+turnFront.position.x = PAGE_W / 2;
+turnFront.renderOrder = 23;
+turnGroup.add(turnFront);
+const turnBackMat = bookBasic({ color: 0xffffff });
+const turnBack = new THREE.Mesh(turnGeomB, turnBackMat);
+turnBack.position.x = PAGE_W / 2;
+turnBack.rotation.y = Math.PI;
+turnBack.renderOrder = 23;
+turnGroup.add(turnBack);
+turnGroup.visible = false;
+
+// bow the leaf: amp > 0 bulges toward the reader mid-flight
+function bendTurnLeaf(amp) {
+  const pf = turnGeomF.attributes.position;
+  const pb = turnGeomB.attributes.position;
+  for (let i = 0; i < pf.count; i++) {
+    const u = (pf.getX(i) + PAGE_W / 2) / PAGE_W; // 0 at spine, 1 at free edge
+    const z = Math.sin(u * Math.PI) * amp;
+    pf.setZ(i, z);
+    pb.setZ(i, -z); // mirrored so both faces stay coincident after the π flip
+  }
+  pf.needsUpdate = true;
+  pb.needsUpdate = true;
+}
+
+// a soft paper swish, synthesized — no audio files needed
+let swishCtx = null;
+function flipSwish() {
+  try {
+    swishCtx = swishCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const dur = 0.3;
+    const buf = swishCtx.createBuffer(1, Math.floor(swishCtx.sampleRate * dur), swishCtx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      const t = i / data.length;
+      data[i] = (Math.random() * 2 - 1) * Math.pow(Math.sin(t * Math.PI), 2) * (0.35 + 0.65 * t);
+    }
+    const src = swishCtx.createBufferSource();
+    src.buffer = buf;
+    const filt = swishCtx.createBiquadFilter();
+    filt.type = 'bandpass';
+    filt.frequency.value = 950;
+    filt.Q.value = 0.7;
+    const gain = swishCtx.createGain();
+    gain.gain.value = 0.15;
+    src.connect(filt);
+    filt.connect(gain);
+    gain.connect(swishCtx.destination);
+    src.start();
+  } catch (e) { /* silence is fine */ }
+}
+
+const book = { active: false, spread: 0, pages: [], post: null, turning: 0, prog: 0 };
+const bookPageCache = new Map();
+
+// aged-paper page canvas: title block on the first leaf, body lines, page number
+function bookPageTexture(post, pageIndex) {
+  const key = 'booktex:' + post.url + ':' + pageIndex;
+  const hit = fullTexCache.get(key);
+  if (hit) return hit.tex;
+  const BW = 512, BH = 696, padX = 54;
+  const c = document.createElement('canvas');
+  c.width = BW; c.height = BH;
+  const g = c.getContext('2d');
+  const grad = g.createLinearGradient(0, 0, BW, BH);
+  grad.addColorStop(0, '#f0e4c8');
+  grad.addColorStop(1, '#e2d0a8');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, BW, BH);
+  // edge age + gutter shading (gutter is the spine side)
+  const leftLeaf = pageIndex % 2 === 0;
+  const gutterX = leftLeaf ? BW : 0;
+  const gsh = g.createLinearGradient(gutterX, 0, gutterX === 0 ? 60 : BW - 60, 0);
+  gsh.addColorStop(0, 'rgba(90,60,30,0.28)');
+  gsh.addColorStop(1, 'rgba(90,60,30,0)');
+  g.fillStyle = gsh;
+  g.fillRect(0, 0, BW, BH);
+  g.strokeStyle = 'rgba(110,80,44,0.35)';
+  g.lineWidth = 2;
+  g.strokeRect(6, 6, BW - 12, BH - 12);
+  const page = book.pages[pageIndex];
+  const ink = '#3a2a1c';
+  let y = 74;
+  if (page && page.first) {
+    g.fillStyle = ink;
+    g.font = '600 34px Georgia, "Songti SC", serif';
+    const probeLines = wrapLines(g, post.title || 'untitled', BW - padX * 2).slice(0, 3);
+    for (const ln of probeLines) { g.fillText(ln, padX, y); y += 44; }
+    g.font = 'italic 22px Georgia, serif';
+    g.fillStyle = 'rgba(90,58,34,0.75)';
+    g.fillText(post.date || '', padX, y + 4);
+    y += 34;
+    g.fillStyle = 'rgba(140,80,50,0.6)';
+    g.font = '26px Georgia, serif';
+    g.fillText('❧', BW / 2 - 12, y + 6);
+    y += 40;
+  }
+  if (page) {
+    g.fillStyle = ink;
+    g.font = '25px Georgia, "Songti SC", serif';
+    for (const ln of page.lines) { g.fillText(ln, padX, y); y += 34; }
+  }
+  g.fillStyle = 'rgba(90,58,34,0.6)';
+  g.font = 'italic 20px Georgia, serif';
+  g.fillText(String(pageIndex + 1), leftLeaf ? padX : BW - padX - 14, BH - 26);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  fullTexCache.set(key, { tex, aspect: BW / BH });
+  return tex;
+}
+
+function paginateWriting(post) {
+  const key = 'bookpages:' + post.url;
+  let pages = bookPageCache.get(key);
+  if (pages) return pages;
+  const probe = document.createElement('canvas').getContext('2d');
+  probe.font = '25px Georgia, "Songti SC", serif';
+  const raw = String(post.body || post.excerpt || '').trim().replace(/\n{2,}/g, '\n \n');
+  const lines = wrapLines(probe, raw, 512 - 54 * 2);
+  const perPage = 17;
+  const firstPageLines = 10;
+  pages = [];
+  let idx = 0;
+  pages.push({ first: true, lines: lines.slice(0, firstPageLines) });
+  idx = firstPageLines;
+  while (idx < lines.length) {
+    pages.push({ first: false, lines: lines.slice(idx, idx + perPage) });
+    idx += perPage;
+  }
+  if (pages.length % 2 === 1) pages.push({ first: false, lines: [] }); // even leaves
+  bookPageCache.set(key, pages);
+  return pages;
+}
+
+function applySpread() {
+  const post = book.post;
+  const li = book.spread * 2;
+  pageLMat.map = bookPageTexture(post, li);
+  pageLMat.needsUpdate = true;
+  pageRMat.map = bookPageTexture(post, li + 1);
+  pageRMat.needsUpdate = true;
+}
+
+function openBook(post) {
+  book.active = true;
+  book.post = post;
+  book.pages = paginateWriting(post);
+  book.spread = 0;
+  book.turning = 0;
+  turnGroup.visible = false;
+  turnGroup.rotation.y = 0;
+  applySpread();
+  // fit the open book to the view
+  const dist = 2.2;
+  const visH = 2 * dist * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+  const visW = visH * camera.aspect;
+  const s = Math.min(1.15, (visH * 0.66) / PAGE_H, (visW * 0.86) / (PAGE_W * 2));
+  bookGroup.scale.setScalar(s);
+  bookGroup.visible = true;
+}
+
+function closeBook() {
+  book.active = false;
+  bookGroup.visible = false;
+}
+
+function flipBook(dir) {
+  if (!book.active || book.turning) return;
+  const maxSpread = Math.ceil(book.pages.length / 2) - 1;
+  if (dir > 0 && book.spread >= maxSpread) { viewerNext(1); return; }
+  if (dir < 0 && book.spread <= 0) { viewerNext(-1); return; }
+  const post = book.post;
+  book.turning = dir;
+  book.prog = 0;
+  turnGroup.visible = true;
+  if (dir > 0) {
+    turnFrontMat.map = bookPageTexture(post, book.spread * 2 + 1);
+    turnBackMat.map = bookPageTexture(post, (book.spread + 1) * 2);
+    pageRMat.map = bookPageTexture(post, (book.spread + 1) * 2 + 1);
+    turnGroup.rotation.y = 0;
+  } else {
+    turnFrontMat.map = bookPageTexture(post, (book.spread - 1) * 2 + 1);
+    turnBackMat.map = bookPageTexture(post, book.spread * 2);
+    pageLMat.map = bookPageTexture(post, (book.spread - 1) * 2);
+    turnGroup.rotation.y = -Math.PI;
+  }
+  turnFrontMat.needsUpdate = turnBackMat.needsUpdate = pageLMat.needsUpdate = pageRMat.needsUpdate = true;
+  flipSwish();
+}
 
 // Full caption text on a translucent panel — every line, not a teaser.
 function drawViewerCaption(post) {
@@ -716,6 +1019,7 @@ function renderViewerSlots(gen) {
   if (main.video) {
     stopMusic(false); // the reel carries its own sound
     vid.src = main.video;
+    vid.muted = false;
     vid.volume = 0.9;
     const applyAspect = () => {
       if (gen === viewerGen && vid.videoWidth) {
@@ -724,7 +1028,12 @@ function renderViewerSlots(gen) {
     };
     vid.onloadedmetadata = applyAspect;
     const p = vid.play();
-    if (p && p.catch) p.catch(() => { /* will start on the next tap */ });
+    if (p && p.catch) p.catch(() => {
+      // strict mobile autoplay: at least play silently rather than freeze
+      vid.muted = true;
+      const q = vid.play();
+      if (q && q.catch) q.catch(() => { /* will start on the next tap */ });
+    });
     // poster while the video buffers
     if (main.img) ensureTexture(main.img, (tex, a) => {
       if (gen === viewerGen && vid.readyState < 2) setViewerTexture(tex, a);
@@ -773,30 +1082,31 @@ function viewerShow(i) {
   const card = cards[viewerState.index];
   const gen = ++viewerGen;
   drawViewerCaption(card.post);
+  if (hint && viewerState.active) hint.textContent = card.writing ? WRITING_HINT : VIEWER_HINT;
 
   if (card.writing) {
-    // a writing hangs as a large manuscript page — no companions
+    // writings open as an old book holding the whole piece
     const tune = musicFor(card.post);
-    if (tune) playMusic(tune); else stopMusic(false);
+    const q = tune ? null : musicQueryFor(card.post);
+    if (tune) playMusic(tune);
+    else { stopMusic(false); if (q) playMusicQuery(q, gen); }
     vid.pause();
-    const key = 'writing:' + (card.post.url || viewerState.index);
-    let cached = fullTexCache.get(key);
-    if (!cached) {
-      cached = { tex: drawWriting(card.post, 768, 960), aspect: 0.8 };
-      fullTexCache.set(key, cached);
-    }
-    setViewerTexture(cached.tex, cached.aspect);
     viewerItems = [];
-    renderViewerSlots(gen);
+    for (const comp of companions) { comp.active = false; comp.group.visible = false; }
+    openBook(card.post);
     return;
   }
 
   // photo/video post: wall thumbnail immediately, then real slides
+  closeBook();
   viewerItems = galleryOf(card.post);
   viewerMainIdx = 0;
   const tune = musicFor(card.post);
+  const q = tune ? null : musicQueryFor(card.post);
   const opensWithVideo = viewerItems[0] && viewerItems[0].video;
-  if (tune && !opensWithVideo) playMusic(tune); else stopMusic(false);
+  if (opensWithVideo) stopMusic(false);
+  else if (tune) playMusic(tune);
+  else { stopMusic(false); if (q) playMusicQuery(q, gen); }
   const thumb = card.loaded && card.photoMesh.material.map ? card.photoMesh.material.map : placeholderTex;
   setViewerTexture(thumb, card.loaded ? (card.aspect || 1) : 1);
   renderViewerSlots(gen);
@@ -819,6 +1129,7 @@ function viewerClose() {
   if (hint) hint.textContent = BASE_HINT;
   stopMusic(false);
   vid.pause();
+  closeBook();
 }
 
 function viewerNext(dir) {
@@ -828,8 +1139,8 @@ function viewerNext(dir) {
 
 window.addEventListener('keydown', (e) => {
   if (!viewerState.active) return;
-  if (e.key === 'ArrowRight') { e.preventDefault(); viewerNext(1); }
-  else if (e.key === 'ArrowLeft') { e.preventDefault(); viewerNext(-1); }
+  if (e.key === 'ArrowRight') { e.preventDefault(); book.active ? flipBook(1) : viewerNext(1); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); book.active ? flipBook(-1) : viewerNext(-1); }
   else if (e.key === 'Escape') viewerClose();
 });
 
@@ -872,9 +1183,25 @@ function animate() {
     }
     const op = viewerState.open * (1 - Math.min(1, Math.abs(viewerState.slide) * 1.6));
     backdropMat.opacity = 0.8 * viewerState.open;
-    viewerPhotoMat.opacity = op;
-    viewerFrameMat.opacity = op;
-    viewerCaptionMat.opacity = op * (captionVisible ? 1 : 0);
+    viewerPhotoMat.opacity = op * (book.active ? 0 : 1);
+    viewerFrameMat.opacity = op * (book.active ? 0 : 1);
+    viewerCaptionMat.opacity = op * (captionVisible && !book.active ? 1 : 0);
+    for (const m of bookMats) m.opacity = book.active ? op : 0;
+    if (book.turning) {
+      book.prog += dt * 1.25;
+      const pr = Math.min(1, book.prog);
+      const ease = pr * pr * (3 - 2 * pr); // smoothstep — paper settles gently
+      turnGroup.rotation.y = book.turning > 0 ? -ease * Math.PI : -(1 - ease) * Math.PI;
+      bendTurnLeaf(Math.sin(pr * Math.PI) * 0.1); // the sheet bows mid-flight
+      if (pr >= 1) {
+        book.spread += book.turning > 0 ? 1 : -1;
+        book.turning = 0;
+        turnGroup.visible = false;
+        turnGroup.rotation.y = 0;
+        bendTurnLeaf(0);
+        applySpread();
+      }
+    }
     for (const comp of companions) {
       if (!comp.active) continue;
       comp.photoMat.opacity = op * 0.96;
