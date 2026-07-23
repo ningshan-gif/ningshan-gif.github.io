@@ -1,0 +1,103 @@
+---
+layout: null
+permalink: /music-room/
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>the music room · Ningshan Ma</title>
+  <meta name="description" content="A little live house — every performance video on a glowing wall.">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@700;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; overflow: hidden; background: #0a0810; }
+    body { font-family: 'Inter', system-ui, sans-serif; color: #e8e2f2; }
+    #room-canvas, #room-canvas canvas { position: fixed; inset: 0; display: block; }
+
+    #room-loading {
+      position: fixed; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center;
+      background: radial-gradient(ellipse at 50% 45%, #1c1428 0%, #08060e 75%);
+      transition: opacity .8s ease; text-align: center;
+    }
+    #room-loading.done { opacity: 0; pointer-events: none; }
+    #room-loading h1 { font-family: 'Darker Grotesque', sans-serif; font-size: 46px; font-weight: 800; color: #ff8ac4; }
+    #room-loading p { margin-top: 8px; color: #9a8ab8; font-size: 14px; }
+    #room-loading a { color: #ffb060; }
+    .neon-dot { display: inline-block; width: 9px; height: 9px; margin: 18px 4px 0; border-radius: 50%;
+      background: #ff6ab0; animation: neondot 1.1s ease-in-out infinite; }
+    .neon-dot:nth-child(2) { background: #4ae0d0; animation-delay: .18s; }
+    .neon-dot:nth-child(3) { background: #ffb060; animation-delay: .36s; }
+    @keyframes neondot { 0%,100% { opacity: .25; } 50% { opacity: 1; } }
+
+    .hud { position: fixed; z-index: 20; pointer-events: none; }
+    #hud-name { top: 24px; left: 28px; }
+    #hud-name h1 { font-family: 'Darker Grotesque', sans-serif; font-size: 40px; line-height: 1; font-weight: 800;
+      color: #ff9ecb; text-shadow: 0 0 22px rgba(255,106,176,.5); }
+    #hud-links { top: 30px; right: 28px; display: flex; gap: 12px; pointer-events: auto; }
+    #hud-links a { color: #e8d8f2; font-size: 14px; font-weight: 500; text-decoration: none;
+      padding: 7px 14px; border: 1px solid rgba(255,138,196,.4); border-radius: 999px;
+      background: rgba(12,8,18,.5); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); transition: all .2s ease; }
+    #hud-links a:hover { background: rgba(255,106,176,.16); border-color: rgba(255,138,196,.8); }
+    #room-hint { bottom: 20px; left: 50%; transform: translateX(-50%); font-size: 13px; color: #b0a0cc;
+      background: rgba(12,8,18,.55); padding: 8px 16px; border-radius: 999px;
+      -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); white-space: nowrap; max-width: 94vw; }
+    #video-tip { position: fixed; z-index: 40; display: none; pointer-events: none; max-width: 320px;
+      background: rgba(10,6,16,.94); border: 1px solid rgba(255,138,196,.45); border-radius: 10px;
+      padding: 10px 14px; }
+    #video-tip strong { display: block; font-size: 13.5px; font-weight: 600; color: #ffd9ec; line-height: 1.4; }
+
+    @media (max-width: 640px) {
+      #hud-name h1 { font-size: 30px; }
+      #hud-name { top: 16px; left: 18px; }
+      #hud-links { top: 56px; right: auto; left: 18px; }
+      #room-hint { font-size: 11px; bottom: 12px; white-space: normal; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <div id="room-canvas"></div>
+
+  <div id="room-loading">
+    <div class="load-inner">
+      <h1>the music room</h1>
+      <p>warming up the amps&hellip;</p>
+      <div><span class="neon-dot"></span><span class="neon-dot"></span><span class="neon-dot"></span></div>
+      <noscript><p><a href="/">JavaScript is off &mdash; back to the room &rarr;</a></p></noscript>
+    </div>
+  </div>
+
+  <div class="hud" id="hud-name">
+    <h1>the music room</h1>
+  </div>
+  <div class="hud" id="hud-links">
+    <a href="/">&larr; back to the room</a>
+    <a href="https://www.instagram.com/otonoori/" rel="noopener">@otonoori</a>
+  </div>
+  <div class="hud" id="room-hint">drag to look around · click a screen to play · esc to stop</div>
+  <div id="video-tip"></div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module" src="/js/room/music-main.js"></script>
+  <script>
+    setTimeout(function () {
+      if (!window.__music) {
+        var el = document.getElementById('room-loading');
+        if (el) el.innerHTML =
+          '<div class="load-inner"><h1>the music room could not load</h1>' +
+          '<p><a href="/">back to the room &rarr;</a></p></div>';
+      }
+    }, 12000);
+  </script>
+</body>
+</html>

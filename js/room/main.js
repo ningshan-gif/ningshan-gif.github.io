@@ -127,6 +127,44 @@ Promise.allSettled([import('./drums.js'), import('./plants.js'), import('./art.j
   }
 });
 
+// ---------- the way to the music room: glowing sign by the instruments ----------
+const musicSign = new THREE.Group();
+(function buildMusicSign() {
+  const post = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.02, 0.026, 1.15, 10),
+    new THREE.MeshStandardMaterial({ color: 0x2a2024, roughness: 0.6 })
+  );
+  post.position.y = 0.575;
+  post.castShadow = true;
+  const c = document.createElement('canvas');
+  c.width = 512; c.height = 224;
+  const g = c.getContext('2d');
+  g.fillStyle = '#14101e';
+  g.fillRect(0, 0, 512, 224);
+  g.strokeStyle = 'rgba(255,138,196,0.9)';
+  g.lineWidth = 6;
+  g.strokeRect(10, 10, 492, 204);
+  g.fillStyle = '#ff9ecb';
+  g.font = '600 62px "Darker Grotesque", Inter, sans-serif';
+  g.fillText('♪ the music room', 40, 100);
+  g.fillStyle = '#4ae0d0';
+  g.font = '500 42px Inter, sans-serif';
+  g.fillText('live videos this way →', 40, 172);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  const panel = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.72, 0.32),
+    new THREE.MeshStandardMaterial({
+      map: tex, emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: 1.15, roughness: 0.6,
+    })
+  );
+  panel.position.y = 1.28;
+  musicSign.add(post, panel);
+  musicSign.position.set(-2.25, 0, -5.15);
+  musicSign.rotation.y = 0.25;
+  scene.add(musicSign);
+})();
+
 // ---------- floating post cards ----------
 const cardsGroup = new THREE.Group();
 scene.add(cardsGroup);
@@ -538,6 +576,21 @@ function pickCard(clientX, clientY) {
 
 renderer.domElement.addEventListener('pointermove', (e) => {
   if (IS_TOUCH || viewerState.active) return;
+  // the music-room sign glows under the cursor
+  pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+  pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  if (raycaster.intersectObject(musicSign, true).length) {
+    if (hovered) { hovered.targetScale = hovered.baseScale; hovered = null; }
+    renderer.domElement.style.cursor = 'pointer';
+    if (tip) {
+      tip.style.display = 'block';
+      tip.style.left = (e.clientX + 14) + 'px';
+      tip.style.top = (e.clientY + 14) + 'px';
+      tip.innerHTML = '<strong>♪ enter the music room</strong>';
+    }
+    return;
+  }
   const card = pickCard(e.clientX, e.clientY);
   if (card !== hovered) {
     if (hovered) hovered.targetScale = hovered.baseScale;
@@ -581,6 +634,13 @@ renderer.domElement.addEventListener('pointerup', (e) => {
     if (compHits.length) swapCompanion(compHits[0].object.userData.companionIndex);
     else if (raycaster.intersectObject(viewerPhoto, false).length) viewerNext(1);
     else viewerClose();
+    return;
+  }
+  pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+  pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  if (raycaster.intersectObject(musicSign, true).length) {
+    window.location.href = '/music-room/';
     return;
   }
   const card = pickCard(e.clientX, e.clientY);
@@ -632,7 +692,7 @@ let captionVisible = false;
 let captionRatio = 0.3; // canvas height / width, drives the plane shape
 
 // companion planes: the other pictures of a multi-image post, fanned around the main one
-const MAX_COMPANIONS = 9;
+const MAX_COMPANIONS = 19; // posts can carry 20 slides — show them all
 const companions = [];
 for (let ci = 0; ci < MAX_COMPANIONS; ci++) {
   const grp = new THREE.Group();
@@ -762,7 +822,8 @@ function bookPageTexture(post, pageIndex) {
   const key = 'booktex:' + post.url + ':' + pageIndex;
   const hit = fullTexCache.get(key);
   if (hit) return hit.tex;
-  const BW = 512, BH = 696, padX = 54;
+  // high-resolution pages so the text stays crisp up close
+  const BW = 1024, BH = 1392, padX = 108;
   const c = document.createElement('canvas');
   c.width = BW; c.height = BH;
   const g = c.getContext('2d');
@@ -774,41 +835,42 @@ function bookPageTexture(post, pageIndex) {
   // edge age + gutter shading (gutter is the spine side)
   const leftLeaf = pageIndex % 2 === 0;
   const gutterX = leftLeaf ? BW : 0;
-  const gsh = g.createLinearGradient(gutterX, 0, gutterX === 0 ? 60 : BW - 60, 0);
+  const gsh = g.createLinearGradient(gutterX, 0, gutterX === 0 ? 120 : BW - 120, 0);
   gsh.addColorStop(0, 'rgba(90,60,30,0.28)');
   gsh.addColorStop(1, 'rgba(90,60,30,0)');
   g.fillStyle = gsh;
   g.fillRect(0, 0, BW, BH);
   g.strokeStyle = 'rgba(110,80,44,0.35)';
-  g.lineWidth = 2;
-  g.strokeRect(6, 6, BW - 12, BH - 12);
+  g.lineWidth = 4;
+  g.strokeRect(12, 12, BW - 24, BH - 24);
   const page = book.pages[pageIndex];
   const ink = '#3a2a1c';
-  let y = 74;
+  let y = 148;
   if (page && page.first) {
     g.fillStyle = ink;
-    g.font = '600 34px Georgia, "Songti SC", serif';
+    g.font = '600 68px Georgia, "Songti SC", serif';
     const probeLines = wrapLines(g, post.title || 'untitled', BW - padX * 2).slice(0, 3);
-    for (const ln of probeLines) { g.fillText(ln, padX, y); y += 44; }
-    g.font = 'italic 22px Georgia, serif';
+    for (const ln of probeLines) { g.fillText(ln, padX, y); y += 88; }
+    g.font = 'italic 44px Georgia, serif';
     g.fillStyle = 'rgba(90,58,34,0.75)';
-    g.fillText(post.date || '', padX, y + 4);
-    y += 34;
+    g.fillText(post.date || '', padX, y + 8);
+    y += 68;
     g.fillStyle = 'rgba(140,80,50,0.6)';
-    g.font = '26px Georgia, serif';
-    g.fillText('❧', BW / 2 - 12, y + 6);
-    y += 40;
+    g.font = '52px Georgia, serif';
+    g.fillText('❧', BW / 2 - 24, y + 12);
+    y += 80;
   }
   if (page) {
     g.fillStyle = ink;
-    g.font = '25px Georgia, "Songti SC", serif';
-    for (const ln of page.lines) { g.fillText(ln, padX, y); y += 34; }
+    g.font = '50px Georgia, "Songti SC", serif';
+    for (const ln of page.lines) { g.fillText(ln, padX, y); y += 68; }
   }
   g.fillStyle = 'rgba(90,58,34,0.6)';
-  g.font = 'italic 20px Georgia, serif';
-  g.fillText(String(pageIndex + 1), leftLeaf ? padX : BW - padX - 14, BH - 26);
+  g.font = 'italic 40px Georgia, serif';
+  g.fillText(String(pageIndex + 1), leftLeaf ? padX : BW - padX - 28, BH - 52);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 8;
   fullTexCache.set(key, { tex, aspect: BW / BH });
   return tex;
 }
@@ -818,9 +880,9 @@ function paginateWriting(post) {
   let pages = bookPageCache.get(key);
   if (pages) return pages;
   const probe = document.createElement('canvas').getContext('2d');
-  probe.font = '25px Georgia, "Songti SC", serif';
+  probe.font = '50px Georgia, "Songti SC", serif';
   const raw = String(post.body || post.excerpt || '').trim().replace(/\n{2,}/g, '\n \n');
-  const lines = wrapLines(probe, raw, 512 - 54 * 2);
+  const lines = wrapLines(probe, raw, 1024 - 108 * 2);
   const perPage = 17;
   const firstPageLines = 10;
   pages = [];
@@ -858,7 +920,7 @@ function openBook(post) {
   const dist = 2.2;
   const visH = 2 * dist * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
   const visW = visH * camera.aspect;
-  const s = Math.min(1.15, (visH * 0.66) / PAGE_H, (visW * 0.86) / (PAGE_W * 2));
+  const s = Math.min(1.3, (visH * 0.72) / PAGE_H, (visW * 0.88) / (PAGE_W * 2));
   bookGroup.scale.setScalar(s);
   bookGroup.visible = true;
 }
@@ -901,34 +963,35 @@ function drawViewerCaption(post) {
     return;
   }
   captionVisible = true;
-  const W = 640, pad = 34;
+  // high-resolution panel so long captions read crisply
+  const W = 960, pad = 50;
   const probe = document.createElement('canvas').getContext('2d');
-  probe.font = '500 30px Inter, "PingFang SC", "Hiragino Sans GB", sans-serif';
+  probe.font = '500 44px Inter, "PingFang SC", "Hiragino Sans GB", sans-serif';
   const text = caption || '♪ a little tune from this day';
   const lines = wrapLines(probe, text, W - pad * 2).slice(0, 22);
-  const lineH = 42;
-  const H = 26 + lines.length * lineH + (hasMusic && caption ? 44 : 0) + 52;
+  const lineH = 62;
+  const H = 40 + lines.length * lineH + (hasMusic && caption ? 66 : 0) + 78;
   const c = document.createElement('canvas');
   c.width = W; c.height = H;
   const g = c.getContext('2d');
   g.fillStyle = 'rgba(20,12,5,0.68)';
   g.beginPath();
-  if (g.roundRect) g.roundRect(3, 3, W - 6, H - 6, 20); else g.rect(3, 3, W - 6, H - 6);
+  if (g.roundRect) g.roundRect(4, 4, W - 8, H - 8, 30); else g.rect(4, 4, W - 8, H - 8);
   g.fill();
   g.strokeStyle = 'rgba(255,217,160,0.35)';
-  g.lineWidth = 2;
+  g.lineWidth = 3;
   g.stroke();
   g.fillStyle = '#ffe6bd';
-  g.font = '500 30px Inter, "PingFang SC", "Hiragino Sans GB", sans-serif';
-  let y = 52;
+  g.font = '500 44px Inter, "PingFang SC", "Hiragino Sans GB", sans-serif';
+  let y = 78;
   for (const ln of lines) { g.fillText(ln, pad, y); y += lineH; }
   if (hasMusic && caption) {
     g.fillStyle = '#e8c98a';
-    g.font = '400 26px Inter, sans-serif';
+    g.font = '400 38px Inter, sans-serif';
     g.fillText('♪ now playing', pad, y);
-    y += 44;
+    y += 66;
   }
-  g.font = '400 24px Inter, sans-serif';
+  g.font = '400 34px Inter, sans-serif';
   g.fillStyle = '#d9b98c';
   g.fillText(post.date || '', pad, y);
   if (viewerCaptionMat.map) viewerCaptionMat.map.dispose();
