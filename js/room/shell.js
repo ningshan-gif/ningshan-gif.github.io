@@ -136,83 +136,95 @@ function makeWainscotTexture(THREE) {
   return srgbTex(THREE, c);
 }
 
-// Open-window view: golden evening sky, Mount Fuji (violet + snow cap), and the sea.
+// Open-window view, Ghibli style: bright sky, fluffy clouds, a wide flat
+// Mount Fuji with a big scalloped snow cap, a treeline at its foot, teal sea.
 function makeFujiSeaTexture(THREE) {
   const w = 768, h = 768;
   const c = document.createElement('canvas');
   c.width = w;
   c.height = h;
   const x = c.getContext('2d');
-  const HOR = 0.63; // horizon line
+  const HOR = 0.66; // horizon line
   // sky
   const sky = x.createLinearGradient(0, 0, 0, h * HOR);
-  sky.addColorStop(0, '#ffe6b0');
-  sky.addColorStop(0.6, '#ffc27a');
-  sky.addColorStop(1, '#ff9a58');
+  sky.addColorStop(0, '#8ec8e8');
+  sky.addColorStop(0.7, '#b8dff0');
+  sky.addColorStop(1, '#e6f2ee');
   x.fillStyle = sky;
   x.fillRect(0, 0, w, h * HOR + 2);
-  // low sun
+  // fluffy cumulus clouds
+  const cloud = (cx, cy, s, alpha) => {
+    x.save();
+    x.filter = 'blur(2px)';
+    x.fillStyle = 'rgba(255,255,255,' + alpha + ')';
+    const lobes = [
+      [0, 0, 1], [-0.9, 0.15, 0.7], [0.9, 0.18, 0.75],
+      [-0.45, -0.28, 0.8], [0.42, -0.3, 0.85], [1.6, 0.22, 0.5],
+    ];
+    for (const lb of lobes) {
+      x.beginPath();
+      x.ellipse(cx + lb[0] * s, cy + lb[1] * s, s * lb[2], s * lb[2] * 0.62, 0, 0, Math.PI * 2);
+      x.fill();
+    }
+    x.restore();
+  };
+  cloud(w * 0.18, h * 0.15, w * 0.055, 0.92);
+  cloud(w * 0.79, h * 0.24, w * 0.045, 0.85);
+  cloud(w * 0.55, h * 0.09, w * 0.034, 0.8);
+  cloud(w * 0.92, h * 0.5, w * 0.03, 0.7);
+  // Mount Fuji — wide and FLAT: base spans the whole view, gentle slopes,
+  // a soft plateau top; ghibli blue
   x.save();
-  x.filter = 'blur(12px)';
-  x.fillStyle = 'rgba(255,248,224,0.95)';
-  x.beginPath();
-  x.arc(w * 0.26, h * 0.5, w * 0.05, 0, Math.PI * 2);
-  x.fill();
-  x.restore();
-  // Mount Fuji — violet-blue, hazy at the base, never green
-  x.save();
-  x.filter = 'blur(2px)';
-  const mg = x.createLinearGradient(0, h * 0.16, 0, h * HOR);
-  mg.addColorStop(0, 'rgba(90,74,120,0.95)');
-  mg.addColorStop(0.8, 'rgba(138,106,136,0.55)');
-  mg.addColorStop(1, 'rgba(158,126,140,0.2)');
+  x.filter = 'blur(1.5px)';
+  const mg = x.createLinearGradient(0, h * 0.3, 0, h * HOR);
+  mg.addColorStop(0, '#6888b8');
+  mg.addColorStop(0.7, '#7e9ac4');
+  mg.addColorStop(1, '#a8bcd4');
   x.fillStyle = mg;
   x.beginPath();
-  x.moveTo(w * 0.02, h * HOR);
-  x.bezierCurveTo(w * 0.26, h * 0.56, w * 0.4, h * 0.24, w * 0.455, h * 0.185);
-  x.lineTo(w * 0.545, h * 0.185);
-  x.bezierCurveTo(w * 0.6, h * 0.24, w * 0.74, h * 0.56, w * 0.98, h * HOR);
+  x.moveTo(-w * 0.02, h * HOR);
+  x.bezierCurveTo(w * 0.2, h * 0.6, w * 0.34, h * 0.4, w * 0.44, h * 0.315);
+  x.quadraticCurveTo(w * 0.5, h * 0.298, w * 0.56, h * 0.315);
+  x.bezierCurveTo(w * 0.66, h * 0.4, w * 0.8, h * 0.6, w * 1.02, h * HOR);
   x.closePath();
   x.fill();
-  // snow cap
-  x.fillStyle = 'rgba(255,250,244,0.97)';
+  // big soft snow cap, wavy scalloped melt line
+  x.fillStyle = 'rgba(252,252,250,0.97)';
   x.beginPath();
-  x.moveTo(w * 0.455, h * 0.185);
-  x.lineTo(w * 0.545, h * 0.185);
-  x.bezierCurveTo(w * 0.565, h * 0.22, w * 0.575, h * 0.26, w * 0.585, h * 0.31);
-  const zig = [
-    [0.565, 0.285], [0.552, 0.325], [0.535, 0.285], [0.518, 0.33],
-    [0.5, 0.29], [0.482, 0.33], [0.465, 0.285], [0.448, 0.325], [0.435, 0.283],
+  x.moveTo(w * 0.44, h * 0.315);
+  x.quadraticCurveTo(w * 0.5, h * 0.298, w * 0.56, h * 0.315);
+  x.bezierCurveTo(w * 0.6, h * 0.35, w * 0.63, h * 0.4, w * 0.655, h * 0.475);
+  const sc = [
+    [0.62, 0.44], [0.585, 0.5], [0.55, 0.445], [0.515, 0.505],
+    [0.48, 0.45], [0.445, 0.5], [0.41, 0.44], [0.375, 0.49], [0.345, 0.475],
   ];
-  for (let i = 0; i < zig.length; i++) x.lineTo(w * zig[i][0], h * zig[i][1]);
-  x.lineTo(w * 0.415, h * 0.31);
-  x.bezierCurveTo(w * 0.425, h * 0.26, w * 0.435, h * 0.22, w * 0.455, h * 0.185);
+  for (let i = 0; i < sc.length; i++) x.lineTo(w * sc[i][0], h * sc[i][1]);
+  x.bezierCurveTo(w * 0.37, h * 0.4, w * 0.4, h * 0.35, w * 0.44, h * 0.315);
   x.closePath();
   x.fill();
   x.restore();
-  // the sea
+  // dark treeline band at the mountain's foot
+  x.save();
+  x.filter = 'blur(3px)';
+  x.fillStyle = 'rgba(42,74,66,0.85)';
+  x.fillRect(-10, h * (HOR - 0.028), w + 20, h * 0.038);
+  x.restore();
+  // the sea — teal, ghibli-clear
   const sea = x.createLinearGradient(0, h * HOR, 0, h);
-  sea.addColorStop(0, '#5a86a0');
-  sea.addColorStop(0.35, '#3d6a84');
-  sea.addColorStop(1, '#27455c');
+  sea.addColorStop(0, '#7ec2c8');
+  sea.addColorStop(0.4, '#4e9aaa');
+  sea.addColorStop(1, '#2e6478');
   x.fillStyle = sea;
   x.fillRect(0, h * HOR, w, h * (1 - HOR));
-  // sun glints on the water
+  // light sparkle on the water
   const rand = makeRng(97);
-  for (let i = 0; i < 90; i++) {
-    const gy = HOR + (1 - HOR) * Math.pow(rand(), 1.6);
-    const spread = 0.1 + (gy - HOR) * 1.3;
-    const gx = 0.26 + (rand() - 0.5) * spread + (rand() - 0.5) * 0.5;
-    const gw = w * (0.008 + rand() * 0.03) * (0.4 + (gy - HOR) * 3);
-    x.fillStyle = 'rgba(255,222,168,' + (0.14 + rand() * 0.32).toFixed(2) + ')';
-    x.fillRect(w * gx - gw / 2, h * gy, gw, Math.max(2, h * 0.004));
+  for (let i = 0; i < 80; i++) {
+    const gy = HOR + (1 - HOR) * Math.pow(rand(), 1.5);
+    const gx = rand();
+    const gw = w * (0.01 + rand() * 0.035) * (0.4 + (gy - HOR) * 3);
+    x.fillStyle = 'rgba(240,250,252,' + (0.1 + rand() * 0.25).toFixed(2) + ')';
+    x.fillRect(w * gx - gw / 2, h * gy, gw, Math.max(2, h * 0.0035));
   }
-  // horizon haze
-  x.save();
-  x.filter = 'blur(10px)';
-  x.fillStyle = 'rgba(255,220,170,0.4)';
-  x.fillRect(-20, h * (HOR - 0.02), w + 40, h * 0.045);
-  x.restore();
   // two little boats
   x.fillStyle = 'rgba(42,34,30,0.85)';
   for (const [bx, by, bs] of [[0.34, 0.72, 1], [0.63, 0.68, 0.7]]) {
