@@ -46,6 +46,35 @@ layout: null
       -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
       text-shadow: 0 1px 8px rgba(0,0,0,.6); white-space: nowrap; }
 
+    #music-bar { position: fixed; z-index: 25; left: 22px; bottom: 22px; display: none;
+      align-items: center; gap: 12px; padding: 10px 16px; border-radius: 999px;
+      background: rgba(26,15,7,.72); border: 1px solid rgba(255,217,160,.4);
+      -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+    #music-bar.on { display: flex; }
+    #music-bar .disc { font-size: 18px; color: #ffd9a0; animation: discpulse 2.2s ease-in-out infinite; }
+    @keyframes discpulse { 0%,100% { transform: scale(1); opacity: .8; } 50% { transform: scale(1.18); opacity: 1; } }
+    #music-bar strong { display: block; font-size: 13.5px; color: #ffe6bd; max-width: 200px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #music-bar em { display: block; font-style: normal; font-size: 11.5px; color: #c9a97f; max-width: 200px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #music-bar a { color: #ffb060; font-size: 12px; font-weight: 600; text-decoration: none;
+      padding: 5px 10px; border: 1px solid rgba(255,176,96,.5); border-radius: 999px; }
+    #music-bar a:hover { background: rgba(255,176,96,.15); }
+    @media (max-width: 640px) {
+      #music-bar { left: 12px; bottom: 64px; padding: 8px 12px; }
+      #music-bar strong, #music-bar em { max-width: 150px; }
+    }
+
+    /* phone caption: crisp scrollable HTML instead of tiny 3D text */
+    #caption-sheet { position: fixed; z-index: 26; left: 0; right: 0; bottom: 0; display: none;
+      max-height: 34vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
+      padding: 14px 18px calc(52px + env(safe-area-inset-bottom));
+      background: linear-gradient(to top, rgba(16,9,4,.96) 65%, rgba(16,9,4,0));
+      border-top: 1px solid rgba(255,217,160,.25); }
+    #caption-sheet.on { display: block; }
+    #caption-sheet p { font-size: 14px; line-height: 1.55; color: #ffe6bd; white-space: pre-wrap; margin: 0 0 6px; }
+    #caption-sheet span { font-size: 11.5px; color: #c9a97f; }
+
     #card-tip { position: fixed; z-index: 40; display: none; pointer-events: none; max-width: 300px;
       background: rgba(22,12,5,.92); border: 1px solid rgba(255,217,160,.4); border-radius: 10px;
       padding: 10px 14px; box-shadow: 0 6px 30px rgba(0,0,0,.5); }
@@ -86,7 +115,13 @@ layout: null
     <a href="/classic/">classic site</a>
   </div>
   <div class="hud" id="room-hint">drag to look around · scroll to zoom · click any photo to read the post</div>
+  <div id="music-bar">
+    <span class="disc">♪</span>
+    <div><strong id="mb-title"></strong><em id="mb-artist"></em></div>
+    <a id="mb-yt" href="#" target="_blank" rel="noopener">YouTube ↗</a>
+  </div>
   <div id="card-tip"></div>
+  <div id="caption-sheet"><p id="cs-text"></p><span id="cs-date"></span></div>
 
   <script type="importmap">
   {
@@ -96,7 +131,7 @@ layout: null
     }
   }
   </script>
-  <script type="module" src="/js/room/main.js?v=6"></script>
+  <script type="module" src="/js/room/main.js?v=7"></script>
   <script>
     // If the module (three.js CDN, import maps, old browser) never boots,
     // don't strand the visitor on the loading screen.

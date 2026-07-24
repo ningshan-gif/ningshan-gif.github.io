@@ -2,16 +2,20 @@
 // Builders live in ./: shell, guitar, dog, desk, fruits — each exports build*(THREE) -> Group.
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { buildShell } from './shell.js?v=6';
-import { buildGuitar } from './guitar.js?v=6';
-import { buildDog } from './dog.js?v=6';
-import { buildDesk } from './desk.js?v=6';
-import { buildFruits } from './fruits.js?v=6';
+import { buildShell } from './shell.js?v=7';
+import { buildGuitar } from './guitar.js?v=7';
+import { buildDog } from './dog.js?v=7';
+import { buildDesk } from './desk.js?v=7';
+import { buildFruits } from './fruits.js?v=7';
 
 const canvasHost = document.getElementById('room-canvas');
 const overlay = document.getElementById('room-loading');
 const tip = document.getElementById('card-tip');
 const hint = document.getElementById('room-hint');
+const musicBar = document.getElementById('music-bar');
+const mbTitle = document.getElementById('mb-title');
+const mbArtist = document.getElementById('mb-artist');
+const mbYt = document.getElementById('mb-yt');
 
 function fatal(msg) {
   if (overlay) {
@@ -106,7 +110,7 @@ place(buildFruits(THREE), 4.9, 0.7, 0);
 place(buildDog(THREE), -1.15, 1.95, -0.22);
 
 // Optional modules (drums, plants, art) — the room still works while they don't exist yet.
-Promise.allSettled([import('./drums.js?v=6'), import('./plants.js?v=6'), import('./art.js?v=6')]).then(([d, p, a]) => {
+Promise.allSettled([import('./drums.js?v=7'), import('./plants.js?v=7'), import('./art.js?v=7')]).then(([d, p, a]) => {
   if (a.status === 'fulfilled') place(a.value.buildArt(THREE), 0, 0, 0);
   if (d.status === 'fulfilled') place(d.value.buildDrums(THREE), -3.35, -4.65, 0.5);
   if (p.status === 'fulfilled') {
@@ -349,9 +353,22 @@ function galleryOf(post) {
   return post.image ? [{ ord: 1, img: post.image, video: null }] : [];
 }
 
+const MUSIC_META = {}; // shortcode -> {title, artist, file} (local preview excerpts)
+
 function musicFor(post) {
   const sc = shortcodeOf(post);
-  return sc && AUDIO_SHORTCODES.has(sc) ? '/audio/' + sc + '.mp3' : null;
+  if (!sc) return null;
+  if (AUDIO_SHORTCODES.has(sc)) return '/audio/' + sc + '.mp3'; // full local mp3 wins
+  const m = MUSIC_META[sc];
+  return (m && m.file) || null; // local ~30s excerpt: instant + mobile-safe
+}
+
+function musicLabelFor(post) {
+  const sc = shortcodeOf(post);
+  const m = sc && MUSIC_META[sc];
+  if (m && m.title) return { name: m.title, artist: m.artist || '' };
+  const raw = sc && MUSIC_QUERIES[sc];
+  return raw ? { name: raw, artist: '' } : null;
 }
 
 // songs named in _data/post_music.yml, resolved to ~30s iTunes previews on demand
@@ -389,10 +406,15 @@ function resolvePreview(q) {
   const stores = hasCJK ? ['tw', 'jp', 'us'] : ['us', 'tw', 'jp'];
   let chain = Promise.resolve(null);
   for (const c of stores) {
-    chain = chain.then(url => url ||
+    chain = chain.then(meta => meta ||
       fetch('https://itunes.apple.com/search?media=music&limit=1&country=' + c + '&term=' + encodeURIComponent(q))
         .then(r => r.json())
-        .then(d => (d.results && d.results[0] && d.results[0].previewUrl) || null)
+        .then(d => {
+          const r0 = d.results && d.results[0];
+          return r0 && r0.previewUrl
+            ? { url: r0.previewUrl, name: r0.trackName || '', artist: r0.artistName || '' }
+            : null;
+        })
         .catch(() => null));
   }
   return chain;
@@ -401,13 +423,19 @@ function resolvePreview(q) {
 function playMusicQuery(q, gen) {
   const hit = previewCache.get(q);
   if (hit) {
-    if (hit.url) playMusic(hit.url);
+    if (hit.url) {
+      playMusic(hit.url);
+      showMusicBar(hit.name || q, hit.artist);
+    }
     return;
   }
   primeMusic(); // synchronously, while the tap still counts
-  resolvePreview(q).then(url => {
-    previewCache.set(q, { url });
-    if (url && viewerState.active && gen === viewerGen) playMusic(url);
+  resolvePreview(q).then(meta => {
+    previewCache.set(q, meta || { url: null });
+    if (meta && meta.url && viewerState.active && gen === viewerGen) {
+      playMusic(meta.url);
+      showMusicBar(meta.name || q, meta.artist);
+    }
   });
 }
 
@@ -519,11 +547,25 @@ function playMusic(src) {
 function stopMusic(immediate) {
   musicTarget = 0;
   clearTimeout(musicStopTimer);
+  hideMusicBar();
   if (immediate) {
     musicVol = 0;
     music.volume = 0;
     if (!music.paused) music.pause();
   }
+}
+
+// the now-playing bar: song, artist, and a YouTube link
+function showMusicBar(name, artist) {
+  if (!musicBar || !name) return;
+  mbTitle.textContent = name;
+  mbArtist.textContent = artist || '';
+  mbYt.href = 'https://www.youtube.com/results?search_query=' +
+    encodeURIComponent((name + ' ' + (artist || '')).trim());
+  musicBar.classList.add('on');
+}
+function hideMusicBar() {
+  if (musicBar) musicBar.classList.remove('on');
 }
 
 fetch('/room-posts.json?t=' + Math.floor(Date.now() / 600000))
@@ -532,6 +574,7 @@ fetch('/room-posts.json?t=' + Math.floor(Date.now() / 600000))
     const posts = data.posts || data; // tolerate the old flat-array shape
     (data.audio || []).forEach(sc => AUDIO_SHORTCODES.add(sc));
     Object.assign(MUSIC_QUERIES, data.music || {});
+    Object.assign(MUSIC_META, data.musicMeta || {});
     buildGalleryMap(data.gallery || []);
     // newest first; every post hangs on a wall (zone capacity >= post count)
     posts.sort((a, b) => (b.ts || 0) - (a.ts || 0));
@@ -988,12 +1031,20 @@ function flipBook(dir) {
   flipSwish();
 }
 
+const captionSheet = document.getElementById('caption-sheet');
+const csText = document.getElementById('cs-text');
+const csDate = document.getElementById('cs-date');
+
 // Full caption text on a translucent panel — every line, not a teaser.
+// On phones the 3D panel is unreadable, so an HTML sheet takes over there.
 function drawViewerCaption(post) {
   const caption = captionOf(post);
-  const hasMusic = !!musicFor(post);
-  if (!caption && !hasMusic) {
+  const hasMusic = hasTuneFor(post);
+  if (IS_TOUCH && captionSheet) {
     captionVisible = false;
+    csText.textContent = caption || '';
+    csDate.textContent = post.date || '';
+    captionSheet.classList.add('on');
     return;
   }
   captionVisible = true;
@@ -1001,8 +1052,9 @@ function drawViewerCaption(post) {
   const W = 960, pad = 50;
   const probe = document.createElement('canvas').getContext('2d');
   probe.font = '500 44px Inter, "PingFang SC", "Hiragino Sans GB", sans-serif';
-  const text = caption || '♪ a little tune from this day';
-  const lines = wrapLines(probe, text, W - pad * 2).slice(0, 22);
+  // no caption, no music -> a small date-only chip (never say "instagram post")
+  const text = caption || (hasMusic ? '♪ a little tune from this day' : '');
+  const lines = text ? wrapLines(probe, text, W - pad * 2).slice(0, 22) : [];
   const lineH = 62;
   const H = 40 + lines.length * lineH + (hasMusic && caption ? 66 : 0) + 78;
   const c = document.createElement('canvas');
@@ -1185,11 +1237,15 @@ function viewerShow(i) {
     // writings open as an old book holding the whole piece
     const tune = musicFor(card.post);
     const q = tune ? null : musicQueryFor(card.post);
-    if (tune) playMusic(tune);
-    else { stopMusic(false); if (q) playMusicQuery(q, gen); }
+    if (tune) {
+      playMusic(tune);
+      const lbl = musicLabelFor(card.post);
+      if (lbl) showMusicBar(lbl.name, lbl.artist);
+    } else { stopMusic(false); if (q) playMusicQuery(q, gen); }
     vid.pause();
     viewerItems = [];
     for (const comp of companions) { comp.active = false; comp.group.visible = false; }
+    if (captionSheet) captionSheet.classList.remove('on'); // the book IS the text
     openBook(card.post);
     return;
   }
@@ -1202,8 +1258,11 @@ function viewerShow(i) {
   const q = tune ? null : musicQueryFor(card.post);
   const opensWithVideo = viewerItems[0] && viewerItems[0].video;
   if (opensWithVideo) stopMusic(false);
-  else if (tune) playMusic(tune);
-  else { stopMusic(false); if (q) playMusicQuery(q, gen); }
+  else if (tune) {
+    playMusic(tune);
+    const lbl = musicLabelFor(card.post);
+    if (lbl) showMusicBar(lbl.name, lbl.artist);
+  } else { stopMusic(false); if (q) playMusicQuery(q, gen); }
   const thumb = card.loaded && card.photoMesh.material.map ? card.photoMesh.material.map : placeholderTex;
   setViewerTexture(thumb, card.loaded ? (card.aspect || 1) : 1);
   renderViewerSlots(gen);
@@ -1228,6 +1287,7 @@ function viewerClose() {
   stopMusic(false);
   vid.pause();
   closeBook();
+  if (captionSheet) captionSheet.classList.remove('on');
 }
 
 function viewerNext(dir) {
