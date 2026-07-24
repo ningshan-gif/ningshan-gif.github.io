@@ -254,6 +254,13 @@ async function trySecret() {
   const hex = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, '0')).join('');
   if (hex === SECRET_HASH) {
     sessionStorage.setItem('room-key', hex);
+    // second derivation (different salt, never stored in the repo) — decrypts
+    // the room's photos and letters
+    const encBits = await crypto.subtle.deriveBits(
+      { name: 'PBKDF2', salt: enc.encode('ningshan-room-enc-v1'), iterations: 210000, hash: 'SHA-256' },
+      km, 256);
+    sessionStorage.setItem('room-enc',
+      Array.from(new Uint8Array(encBits)).map(b => b.toString(16).padStart(2, '0')).join(''));
     window.location.href = '/secret-room/';
   } else {
     smErr.style.display = 'block';
