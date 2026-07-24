@@ -2,11 +2,11 @@
 // Builders live in ./: shell, guitar, dog, desk, fruits — each exports build*(THREE) -> Group.
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { buildShell } from './shell.js?v=7';
-import { buildGuitar } from './guitar.js?v=7';
-import { buildDog } from './dog.js?v=7';
-import { buildDesk } from './desk.js?v=7';
-import { buildFruits } from './fruits.js?v=7';
+import { buildShell } from './shell.js?v=8';
+import { buildGuitar } from './guitar.js?v=8';
+import { buildDog } from './dog.js?v=8';
+import { buildDesk } from './desk.js?v=8';
+import { buildFruits } from './fruits.js?v=8';
 
 const canvasHost = document.getElementById('room-canvas');
 const overlay = document.getElementById('room-loading');
@@ -110,7 +110,7 @@ place(buildFruits(THREE), 4.9, 0.7, 0);
 place(buildDog(THREE), -1.15, 1.95, -0.22);
 
 // Optional modules (drums, plants, art) — the room still works while they don't exist yet.
-Promise.allSettled([import('./drums.js?v=7'), import('./plants.js?v=7'), import('./art.js?v=7')]).then(([d, p, a]) => {
+Promise.allSettled([import('./drums.js?v=8'), import('./plants.js?v=8'), import('./art.js?v=8')]).then(([d, p, a]) => {
   if (a.status === 'fulfilled') place(a.value.buildArt(THREE), 0, 0, 0);
   if (d.status === 'fulfilled') place(d.value.buildDrums(THREE), -3.35, -4.65, 0.5);
   if (p.status === 'fulfilled') {
@@ -443,12 +443,26 @@ function isWriting(post) {
   return !((post.tags || []).indexOf('instagram') >= 0);
 }
 
-// captionless instagram posts get auto-titles like "@sleepychunk · 2026-07-13"
+// captionless instagram posts carry filler titles — treat them all as "no caption"
 function captionOf(post) {
   const t = (post.title || '').trim();
   if (!t) return null;
-  if (/^@\S+\s*·\s*\d{4}-\d{2}-\d{2}$/.test(t)) return null;
+  if (/^instagram post$/i.test(t)) return null;
+  if (/^@\S+\s*[·•\-–]\s*[\d\-\/.]+$/.test(t)) return null;
   if (/^photo from @/i.test(t)) return null;
+  return t;
+}
+
+// titles were historically truncated by the sync — the full caption lives in
+// the post body (caption text + a trailing attribution line we strip off)
+function fullCaptionOf(post) {
+  const t = captionOf(post);
+  if (isWriting(post)) return t; // writings show their text as the book
+  let b = String(post.body || '');
+  if (!b.trim()) return t;
+  b = b.replace(/@[\w.]+\s*·[^\n]*$/m, '');      // trailing attribution line
+  b = b.replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim(); // gallery debris
+  if (b && (!t || b.length > t.length)) return b;
   return t;
 }
 
@@ -1038,7 +1052,7 @@ const csDate = document.getElementById('cs-date');
 // Full caption text on a translucent panel — every line, not a teaser.
 // On phones the 3D panel is unreadable, so an HTML sheet takes over there.
 function drawViewerCaption(post) {
-  const caption = captionOf(post);
+  const caption = fullCaptionOf(post);
   const hasMusic = hasTuneFor(post);
   if (IS_TOUCH && captionSheet) {
     captionVisible = false;
@@ -1051,11 +1065,18 @@ function drawViewerCaption(post) {
   // high-resolution panel so long captions read crisply
   const W = 960, pad = 50;
   const probe = document.createElement('canvas').getContext('2d');
-  probe.font = '500 44px Inter, "PingFang SC", "Hiragino Sans GB", sans-serif';
   // no caption, no music -> a small date-only chip (never say "instagram post")
   const text = caption || (hasMusic ? '♪ a little tune from this day' : '');
-  const lines = text ? wrapLines(probe, text, W - pad * 2).slice(0, 22) : [];
-  const lineH = 62;
+  // every line shows — long captions shrink their type instead of truncating
+  let fontPx = 44;
+  probe.font = '500 44px Inter, "PingFang SC", "Hiragino Sans GB", sans-serif';
+  let lines = text ? wrapLines(probe, text, W - pad * 2) : [];
+  if (lines.length > 26) {
+    fontPx = 34;
+    probe.font = '500 34px Inter, "PingFang SC", "Hiragino Sans GB", sans-serif';
+    lines = wrapLines(probe, text, W - pad * 2);
+  }
+  const lineH = Math.round(fontPx * 1.42);
   const H = 40 + lines.length * lineH + (hasMusic && caption ? 66 : 0) + 78;
   const c = document.createElement('canvas');
   c.width = W; c.height = H;
@@ -1068,8 +1089,8 @@ function drawViewerCaption(post) {
   g.lineWidth = 3;
   g.stroke();
   g.fillStyle = '#ffe6bd';
-  g.font = '500 44px Inter, "PingFang SC", "Hiragino Sans GB", sans-serif';
-  let y = 78;
+  g.font = '500 ' + fontPx + 'px Inter, "PingFang SC", "Hiragino Sans GB", sans-serif';
+  let y = 34 + fontPx;
   for (const ln of lines) { g.fillText(ln, pad, y); y += lineH; }
   if (hasMusic && caption) {
     g.fillStyle = '#e8c98a';
@@ -1115,8 +1136,10 @@ function fitViewerPhoto(aspect) {
   if (mainH > maxH) { mainH = maxH; mainW = maxH * a; }
   viewerPhoto.scale.set(mainW, mainH, 1);
   viewerFrame.scale.set(mainW + 0.08, mainH + 0.08, 1);
-  // caption: beside the photo when there's room, tucked under it when not
-  const capW = Math.min(1.05, Math.max(0.7, (visW - mainW) * 0.6));
+  // caption: beside the photo when there's room, tucked under it when not.
+  // very long captions cap at the view height rather than overflowing it
+  let capW = Math.min(1.05, Math.max(0.7, (visW - mainW) * 0.6));
+  if (capW * captionRatio > visH * 0.78) capW = (visH * 0.78) / captionRatio;
   viewerCaption.scale.set(capW, capW * captionRatio, 1);
   if (visW - mainW > capW + 0.3) {
     viewerCaption.position.set(mainW / 2 + capW / 2 + 0.14, -mainH * 0.06, 0.18);
