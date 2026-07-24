@@ -22,16 +22,18 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, IS_TOUCH ? 1.5 : 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = !IS_TOUCH;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.1;
+renderer.toneMappingExposure = 1.12;
 canvasHost.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x05070f);
-scene.fog = new THREE.FogExp2(0x070a16, 0.018);
+scene.fog = new THREE.FogExp2(0x070a16, 0.014);
 
-const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.05, 100);
-camera.position.set(0, 1.9, 6.4);
+const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.05, 120);
+camera.position.set(0, 2.2, 7.4);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(0, 1.7, 0);
@@ -40,10 +42,13 @@ controls.dampingFactor = 0.06;
 controls.enablePan = false;
 controls.minDistance = 2.2;
 controls.maxDistance = 10;
+controls.maxPolarAngle = 1.6; // stay above the lake
 controls.autoRotate = !REDUCED_MOTION;
 controls.autoRotateSpeed = 0.4;
 renderer.domElement.addEventListener('pointerdown', () => { controls.autoRotate = false; }, { once: true });
 
+// night light: cold moon, one warm pool by the mailbox
+const updatables = [];
 scene.add(new THREE.AmbientLight(0x30395c, 1.1));
 const moonLight = new THREE.PointLight(0xbcd0ff, 30, 40, 2);
 moonLight.position.set(-4, 6, 3);
@@ -52,13 +57,25 @@ const warmLight = new THREE.PointLight(0xffb060, 12, 18, 2);
 warmLight.position.set(2.5, 2.2, 2);
 scene.add(warmLight);
 
-// dark still-water floor
-const floor = new THREE.Mesh(
-  new THREE.CircleGeometry(10, 48),
-  new THREE.MeshStandardMaterial({ color: 0x0a0e1c, roughness: 0.15, metalness: 0.4 })
+// a vast dark sea, still as glass, with a moon-path shimmer
+const sea = new THREE.Mesh(
+  new THREE.CircleGeometry(60, 64),
+  new THREE.MeshStandardMaterial({ color: 0x0a0e1c, roughness: 0.12, metalness: 0.45 })
 );
-floor.rotation.x = -Math.PI / 2;
-scene.add(floor);
+sea.rotation.x = -Math.PI / 2;
+sea.position.y = -0.02;
+scene.add(sea);
+const moonPath = new THREE.Mesh(
+  new THREE.PlaneGeometry(2.2, 34),
+  new THREE.MeshBasicMaterial({
+    color: 0x9ab8e8, transparent: true, opacity: 0.1,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+  })
+);
+moonPath.rotation.x = -Math.PI / 2;
+moonPath.position.set(-6, 0.005, -8);
+moonPath.rotation.z = 0.5;
+scene.add(moonPath);
 
 // starfield
 {
@@ -134,6 +151,70 @@ const globe = new THREE.Mesh(
 globe.position.set(0, 1.9, 0);
 globe.rotation.z = 0.41;
 scene.add(globe);
+
+// ---------- a sky of colorful floating planets ----------
+function planetTexture(colors) {
+  const c = document.createElement('canvas');
+  c.width = 256; c.height = 128;
+  const g = c.getContext('2d');
+  g.fillStyle = colors[0];
+  g.fillRect(0, 0, 256, 128);
+  // soft horizontal bands
+  for (let i = 0; i < 7; i++) {
+    g.fillStyle = colors[1 + (i % (colors.length - 1))];
+    g.globalAlpha = 0.35 + (i % 3) * 0.15;
+    const y = 8 + i * 17 + Math.sin(i * 2.1) * 5;
+    g.fillRect(0, y, 256, 7 + (i % 3) * 5);
+  }
+  g.globalAlpha = 0.25;
+  for (let i = 0; i < 9; i++) {
+    g.fillStyle = colors[(i % (colors.length - 1)) + 1];
+    g.beginPath();
+    g.ellipse(20 + i * 27, 20 + (i * 37) % 88, 10 + (i % 3) * 6, 5 + (i % 2) * 3, 0.3, 0, Math.PI * 2);
+    g.fill();
+  }
+  g.globalAlpha = 1;
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+const planets = [];
+const PLANET_DEFS = [
+  { r: 0.55, cols: ['#e8788a', '#f6a8b8', '#d95a78'], ring: '#f0d8a0', pos: [-5.5, 4.8, -6.5], spin: 0.15 },
+  { r: 0.38, cols: ['#7ad0c8', '#a8e8e0', '#4aa89a'], ring: null, pos: [6.2, 5.6, -3.5], spin: 0.22 },
+  { r: 0.72, cols: ['#8a78c8', '#a898e0', '#6a5aa8'], ring: '#c8b8f0', pos: [4.5, 7.4, -9], spin: 0.1 },
+  { r: 0.3, cols: ['#f0c060', '#f8d890', '#d9a040'], ring: null, pos: [-6.8, 6.8, 2.5], spin: 0.3 },
+  { r: 0.46, cols: ['#f09a58', '#f8b880', '#d97a38'], ring: '#c8e8f0', pos: [7.5, 4.2, 4.5], spin: 0.18 },
+  { r: 0.26, cols: ['#a8d878', '#c8eca0', '#7ab850'], ring: null, pos: [-3.5, 8.2, 6.5], spin: 0.26 },
+  { r: 0.34, cols: ['#78a8e8', '#a0c8f8', '#5a88c8'], ring: null, pos: [0.5, 9.0, -4], spin: 0.2 },
+  { r: 0.2, cols: ['#e8b8d8', '#f8d8ec', '#c890b8'], ring: '#f8f0d8', pos: [-8.2, 5.4, -2], spin: 0.34 },
+];
+for (const def of PLANET_DEFS) {
+  const grp = new THREE.Group();
+  const body = new THREE.Mesh(
+    new THREE.SphereGeometry(def.r, 24, 16),
+    new THREE.MeshStandardMaterial({
+      map: planetTexture(def.cols), roughness: 0.75,
+      emissive: new THREE.Color(def.cols[0]), emissiveIntensity: 0.22,
+    })
+  );
+  grp.add(body);
+  if (def.ring) {
+    const ring = new THREE.Mesh(
+      new THREE.RingGeometry(def.r * 1.35, def.r * 1.9, 32),
+      new THREE.MeshBasicMaterial({
+        color: def.ring, transparent: true, opacity: 0.55, side: THREE.DoubleSide,
+      })
+    );
+    ring.rotation.x = Math.PI / 2 - 0.35;
+    grp.add(ring);
+  }
+  grp.position.set(def.pos[0], def.pos[1], def.pos[2]);
+  grp.rotation.z = (Math.random() - 0.5) * 0.4;
+  scene.add(grp);
+  planets.push({ grp, body, spin: def.spin, bob: Math.random() * Math.PI * 2, baseY: def.pos[1] });
+}
 
 // floating paper lanterns
 const lanterns = [];
@@ -282,7 +363,8 @@ const mailbox = new THREE.Group();
   scene.add(mailbox);
 })();
 
-// letters: incremental first, then random re-reads once all have been opened
+// letters: one NEW letter per day, in order; once all are read, any visit
+// may re-read a random one from the archive
 let letters = [];
 function openLetter() {
   if (!letterCard) return;
@@ -291,16 +373,24 @@ function openLetter() {
     letterText.textContent = '信还在路上。';
   } else {
     const read = parseInt(localStorage.getItem('secret-letters-read') || '0', 10);
-    let idx;
     if (read < letters.length) {
-      idx = read;
-      localStorage.setItem('secret-letters-read', String(read + 1));
+      const today = new Date().toDateString();
+      if (localStorage.getItem('secret-letter-day') === today && read > 0) {
+        letterNo.textContent = '今日已读';
+        letterText.textContent = '今天的信已经送到了。\n明天再来，会有新的一封。';
+      } else {
+        const L = letters[read];
+        localStorage.setItem('secret-letters-read', String(read + 1));
+        localStorage.setItem('secret-letter-day', today);
+        letterNo.textContent = '第 ' + (L.n || read + 1) + ' 封';
+        letterText.textContent = L.text || '';
+      }
     } else {
-      idx = Math.floor(Math.random() * letters.length);
+      const idx = Math.floor(Math.random() * letters.length);
+      const L = letters[idx];
+      letterNo.textContent = '第 ' + (L.n || idx + 1) + ' 封 · 重读';
+      letterText.textContent = L.text || '';
     }
-    const L = letters[idx];
-    letterNo.textContent = '第 ' + (L.n || idx + 1) + ' 封';
-    letterText.textContent = L.text || '';
   }
   letterCard.classList.add('on');
 }
@@ -369,7 +459,12 @@ function animate() {
   const dt = Math.min(clock.getDelta(), 0.05);
   const t = clock.elapsedTime;
   controls.update();
+  for (const fn of updatables) fn(t, dt);
   globe.rotation.y += dt * 0.12;
+  for (const p of planets) {
+    p.body.rotation.y += dt * p.spin;
+    if (!REDUCED_MOTION) p.grp.position.y = p.baseY + Math.sin(t * 0.3 + p.bob) * 0.12;
+  }
   if (!REDUCED_MOTION) {
     ringA.rotation.y += dt * 0.05;
     ringB.rotation.y -= dt * 0.035;
