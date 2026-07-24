@@ -129,49 +129,72 @@ function earthTexture(size) {
     g.closePath();
     g.fill();
   };
-  blob([[0.08, 0.28], [0.16, 0.18], [0.24, 0.24], [0.27, 0.38], [0.22, 0.5], [0.12, 0.46], [0.06, 0.36]]);
-  blob([[0.24, 0.55], [0.3, 0.52], [0.32, 0.66], [0.28, 0.82], [0.24, 0.7]]);
-  blob([[0.44, 0.3], [0.52, 0.26], [0.56, 0.4], [0.52, 0.6], [0.46, 0.72], [0.42, 0.52], [0.42, 0.38]]);
-  blob([[0.5, 0.2], [0.62, 0.14], [0.78, 0.2], [0.86, 0.3], [0.78, 0.42], [0.66, 0.4], [0.56, 0.3]]);
-  blob([[0.78, 0.62], [0.86, 0.6], [0.88, 0.7], [0.8, 0.72]]);
-  g.fillStyle = 'rgba(240,246,250,0.9)';
-  g.fillRect(0, 0, w, h * 0.06);
-  g.fillRect(0, h * 0.95, w, h * 0.05);
+  const LANDS = [
+    [[0.08, 0.28], [0.16, 0.18], [0.24, 0.24], [0.27, 0.38], [0.22, 0.5], [0.12, 0.46], [0.06, 0.36]],
+    [[0.24, 0.55], [0.3, 0.52], [0.32, 0.66], [0.28, 0.82], [0.24, 0.7]],
+    [[0.44, 0.3], [0.52, 0.26], [0.56, 0.4], [0.52, 0.6], [0.46, 0.72], [0.42, 0.52], [0.42, 0.38]],
+    [[0.5, 0.2], [0.62, 0.14], [0.78, 0.2], [0.86, 0.3], [0.78, 0.42], [0.66, 0.4], [0.56, 0.3]],
+    [[0.78, 0.62], [0.86, 0.6], [0.88, 0.7], [0.8, 0.72]],
+  ];
+  // soft coastline shadow first, then the land with a deeper green edge
+  g.save();
+  g.translate(w * 0.004, h * 0.01);
+  g.fillStyle = 'rgba(16,40,60,0.5)';
+  for (const L of LANDS) blob(L);
+  g.restore();
+  for (const L of LANDS) blob(L);
+  g.strokeStyle = 'rgba(46,74,48,0.8)';
+  g.lineWidth = Math.max(2, w / 300);
+  for (const L of LANDS) {
+    g.beginPath();
+    g.moveTo(L[0][0] * w, L[0][1] * h);
+    for (let i = 1; i < L.length; i++) {
+      const a = L[i - 1], b = L[i];
+      g.quadraticCurveTo(a[0] * w, a[1] * h, (a[0] + b[0]) / 2 * w, (a[1] + b[1]) / 2 * h);
+    }
+    g.closePath();
+    g.stroke();
+  }
+  // dry interiors + little archipelagos
+  g.fillStyle = 'rgba(190,170,110,0.45)';
+  g.beginPath(); g.ellipse(w * 0.49, h * 0.42, w * 0.03, h * 0.07, 0.3, 0, Math.PI * 2); g.fill();
+  g.beginPath(); g.ellipse(w * 0.7, h * 0.27, w * 0.035, h * 0.05, -0.2, 0, Math.PI * 2); g.fill();
+  g.fillStyle = '#7a9a68';
+  for (const [ax, ay] of [[0.83, 0.45], [0.85, 0.48], [0.87, 0.44], [0.35, 0.44], [0.9, 0.56], [0.63, 0.52]]) {
+    g.beginPath(); g.ellipse(ax * w, ay * h, w * 0.008, h * 0.012, 0, 0, Math.PI * 2); g.fill();
+  }
+  // polar ice, softened
+  const ice = g.createLinearGradient(0, 0, 0, h * 0.1);
+  ice.addColorStop(0, 'rgba(240,246,250,0.95)');
+  ice.addColorStop(1, 'rgba(240,246,250,0)');
+  g.fillStyle = ice;
+  g.fillRect(0, 0, w, h * 0.1);
+  const ice2 = g.createLinearGradient(0, h * 0.9, 0, h);
+  ice2.addColorStop(0, 'rgba(240,246,250,0)');
+  ice2.addColorStop(1, 'rgba(240,246,250,0.95)');
+  g.fillStyle = ice2;
+  g.fillRect(0, h * 0.9, w, h * 0.1);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   return tex;
 }
 
-const globe = new THREE.Mesh(
-  new THREE.SphereGeometry(1.05, 48, 32),
-  new THREE.MeshStandardMaterial({
-    map: earthTexture(1024), roughness: 0.7, emissive: 0x223a66, emissiveIntensity: 0.35,
-  })
-);
-globe.position.set(0, 1.9, 0);
-globe.rotation.z = 0.41;
-scene.add(globe);
-
-// ---------- a sky of colorful floating planets ----------
-function planetTexture(colors) {
+function cloudTexture() {
   const c = document.createElement('canvas');
-  c.width = 256; c.height = 128;
+  c.width = 512; c.height = 256;
   const g = c.getContext('2d');
-  g.fillStyle = colors[0];
-  g.fillRect(0, 0, 256, 128);
-  // soft horizontal bands
-  for (let i = 0; i < 7; i++) {
-    g.fillStyle = colors[1 + (i % (colors.length - 1))];
-    g.globalAlpha = 0.35 + (i % 3) * 0.15;
-    const y = 8 + i * 17 + Math.sin(i * 2.1) * 5;
-    g.fillRect(0, y, 256, 7 + (i % 3) * 5);
-  }
-  g.globalAlpha = 0.25;
-  for (let i = 0; i < 9; i++) {
-    g.fillStyle = colors[(i % (colors.length - 1)) + 1];
-    g.beginPath();
-    g.ellipse(20 + i * 27, 20 + (i * 37) % 88, 10 + (i % 3) * 6, 5 + (i % 2) * 3, 0.3, 0, Math.PI * 2);
-    g.fill();
+  g.clearRect(0, 0, 512, 256);
+  g.fillStyle = 'rgba(255,255,255,0.85)';
+  let sd = 9;
+  const rnd = () => { sd = (sd * 16807) % 2147483647; return sd / 2147483647; };
+  for (let i = 0; i < 46; i++) {
+    const x = rnd() * 512, y = 30 + rnd() * 196;
+    for (let k = 0; k < 5; k++) {
+      g.globalAlpha = 0.12 + rnd() * 0.2;
+      g.beginPath();
+      g.ellipse(x + (rnd() - 0.5) * 46, y + (rnd() - 0.5) * 12, 14 + rnd() * 22, 4 + rnd() * 6, 0, 0, Math.PI * 2);
+      g.fill();
+    }
   }
   g.globalAlpha = 1;
   const tex = new THREE.CanvasTexture(c);
@@ -179,41 +202,223 @@ function planetTexture(colors) {
   return tex;
 }
 
+const earthMap = earthTexture(1024);
+const globe = new THREE.Mesh(
+  new THREE.SphereGeometry(1.05, 48, 32),
+  new THREE.MeshStandardMaterial({
+    map: earthMap, roughness: 0.62, metalness: 0.05,
+    emissive: 0xaabbd8, emissiveIntensity: 0.5, emissiveMap: earthMap,
+  })
+);
+globe.position.set(0, 1.9, 0);
+globe.rotation.z = 0.41;
+scene.add(globe);
+
+const clouds = new THREE.Mesh(
+  new THREE.SphereGeometry(1.075, 48, 32),
+  new THREE.MeshStandardMaterial({
+    map: cloudTexture(), transparent: true, opacity: 0.75,
+    roughness: 1, depthWrite: false,
+  })
+);
+clouds.position.copy(globe.position);
+clouds.rotation.z = 0.41;
+scene.add(clouds);
+
+const atmosphere = new THREE.Mesh(
+  new THREE.SphereGeometry(1.22, 48, 32),
+  new THREE.MeshBasicMaterial({
+    color: 0x6a90e0, transparent: true, opacity: 0.2,
+    blending: THREE.AdditiveBlending, side: THREE.BackSide, depthWrite: false,
+  })
+);
+atmosphere.position.copy(globe.position);
+scene.add(atmosphere);
+
+// ---------- little-prince planets: small pastel worlds you could live on ----------
+// each carries tiny flowers, and some a bare sprig, a volcano, a pastel ring
 const planets = [];
-const PLANET_DEFS = [
-  { r: 0.55, cols: ['#e8788a', '#f6a8b8', '#d95a78'], ring: '#f0d8a0', pos: [-5.5, 4.8, -6.5], spin: 0.15 },
-  { r: 0.38, cols: ['#7ad0c8', '#a8e8e0', '#4aa89a'], ring: null, pos: [6.2, 5.6, -3.5], spin: 0.22 },
-  { r: 0.72, cols: ['#8a78c8', '#a898e0', '#6a5aa8'], ring: '#c8b8f0', pos: [4.5, 7.4, -9], spin: 0.1 },
-  { r: 0.3, cols: ['#f0c060', '#f8d890', '#d9a040'], ring: null, pos: [-6.8, 6.8, 2.5], spin: 0.3 },
-  { r: 0.46, cols: ['#f09a58', '#f8b880', '#d97a38'], ring: '#c8e8f0', pos: [7.5, 4.2, 4.5], spin: 0.18 },
-  { r: 0.26, cols: ['#a8d878', '#c8eca0', '#7ab850'], ring: null, pos: [-3.5, 8.2, 6.5], spin: 0.26 },
-  { r: 0.34, cols: ['#78a8e8', '#a0c8f8', '#5a88c8'], ring: null, pos: [0.5, 9.0, -4], spin: 0.2 },
-  { r: 0.2, cols: ['#e8b8d8', '#f8d8ec', '#c890b8'], ring: '#f8f0d8', pos: [-8.2, 5.4, -2], spin: 0.34 },
-];
-for (const def of PLANET_DEFS) {
-  const grp = new THREE.Group();
-  const body = new THREE.Mesh(
-    new THREE.SphereGeometry(def.r, 24, 16),
-    new THREE.MeshStandardMaterial({
-      map: planetTexture(def.cols), roughness: 0.75,
-      emissive: new THREE.Color(def.cols[0]), emissiveIntensity: 0.22,
-    })
+function surfacePoint(grp, r, theta, phi) {
+  // returns a group oriented so +Y points out of the planet at that spot
+  const holder = new THREE.Group();
+  const n = new THREE.Vector3(
+    Math.sin(phi) * Math.cos(theta),
+    Math.cos(phi),
+    Math.sin(phi) * Math.sin(theta)
   );
+  holder.position.copy(n).multiplyScalar(r);
+  holder.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), n);
+  grp.add(holder);
+  return holder;
+}
+
+function makeB612(def) {
+  const grp = new THREE.Group();
+  const mat = new THREE.MeshStandardMaterial({
+    color: def.col, roughness: 0.95,
+    emissive: new THREE.Color(def.col), emissiveIntensity: 0.18,
+  });
+  const body = new THREE.Mesh(new THREE.SphereGeometry(def.r, 22, 16), mat);
   grp.add(body);
+  // a few soft craters — slightly darker flattened discs hugging the surface
+  const craterMat = new THREE.MeshStandardMaterial({
+    color: new THREE.Color(def.col).multiplyScalar(0.82), roughness: 1,
+  });
+  for (let i = 0; i < 4; i++) {
+    const h = surfacePoint(grp, def.r * 0.99, i * 2.1 + def.seed, 0.7 + (i % 3) * 0.6);
+    const crater = new THREE.Mesh(new THREE.CircleGeometry(def.r * (0.16 + (i % 2) * 0.08), 14), craterMat);
+    crater.rotation.x = -Math.PI / 2;
+    crater.position.y = 0.004;
+    h.add(crater);
+  }
+  // tiny flowers, petals like the rose's cousins
+  const stemMat = new THREE.MeshStandardMaterial({ color: 0x4a7a4a, roughness: 1 });
+  const petalCols = [0xe86a90, 0xf0d060, 0xf6f0e6];
+  for (let i = 0; i < def.flowers; i++) {
+    const h = surfacePoint(grp, def.r, i * 1.7 + def.seed * 2, 0.5 + (i * 0.9) % 2.1);
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.008, 0.07, 6), stemMat);
+    stem.position.y = 0.035;
+    h.add(stem);
+    const petalMat = new THREE.MeshStandardMaterial({
+      color: petalCols[i % 3], roughness: 0.9,
+      emissive: petalCols[i % 3], emissiveIntensity: 0.25,
+    });
+    for (let p = 0; p < 5; p++) {
+      const a = p / 5 * Math.PI * 2;
+      const petal = new THREE.Mesh(new THREE.SphereGeometry(0.016, 8, 6), petalMat);
+      petal.position.set(Math.cos(a) * 0.02, 0.075, Math.sin(a) * 0.02);
+      h.add(petal);
+    }
+    const heart = new THREE.Mesh(
+      new THREE.SphereGeometry(0.011, 8, 6),
+      new THREE.MeshStandardMaterial({ color: 0xd9a040, roughness: 0.8 })
+    );
+    heart.position.y = 0.08;
+    h.add(heart);
+  }
+  // a bare little sprig on some worlds
+  if (def.sprig) {
+    const h = surfacePoint(grp, def.r, def.seed * 3.3, 0.5);
+    const twigMat = new THREE.MeshStandardMaterial({ color: 0x5a4a3c, roughness: 1 });
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.012, def.r * 0.8, 6), twigMat);
+    trunk.position.y = def.r * 0.4;
+    trunk.rotation.z = 0.15;
+    h.add(trunk);
+    for (const s of [-1, 1]) {
+      const twig = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.007, def.r * 0.4, 5), twigMat);
+      twig.position.set(s * 0.03, def.r * 0.66, 0);
+      twig.rotation.z = s * 0.7;
+      h.add(twig);
+    }
+  }
+  // a sleepy volcano with a smoke wisp
+  if (def.volcano) {
+    const h = surfacePoint(grp, def.r * 0.98, def.seed * 5.1, 1.9);
+    const cone = new THREE.Mesh(
+      new THREE.ConeGeometry(def.r * 0.22, def.r * 0.3, 12),
+      new THREE.MeshStandardMaterial({ color: new THREE.Color(def.col).multiplyScalar(0.7), roughness: 1 })
+    );
+    cone.position.y = def.r * 0.13;
+    h.add(cone);
+    const smokeMat = new THREE.MeshBasicMaterial({ color: 0xd8d8e0, transparent: true, opacity: 0.35 });
+    for (let s = 0; s < 3; s++) {
+      const puff = new THREE.Mesh(new THREE.SphereGeometry(0.02 + s * 0.008, 8, 6), smokeMat);
+      puff.position.set(Math.sin(s * 1.8) * 0.02, def.r * 0.3 + s * 0.05, 0);
+      h.add(puff);
+    }
+  }
   if (def.ring) {
     const ring = new THREE.Mesh(
-      new THREE.RingGeometry(def.r * 1.35, def.r * 1.9, 32),
-      new THREE.MeshBasicMaterial({
-        color: def.ring, transparent: true, opacity: 0.55, side: THREE.DoubleSide,
-      })
+      new THREE.RingGeometry(def.r * 1.4, def.r * 1.85, 32),
+      new THREE.MeshBasicMaterial({ color: def.ring, transparent: true, opacity: 0.45, side: THREE.DoubleSide })
     );
     ring.rotation.x = Math.PI / 2 - 0.35;
     grp.add(ring);
   }
   grp.position.set(def.pos[0], def.pos[1], def.pos[2]);
-  grp.rotation.z = (Math.random() - 0.5) * 0.4;
+  grp.rotation.z = def.seed % 0.5 - 0.25;
   scene.add(grp);
-  planets.push({ grp, body, spin: def.spin, bob: Math.random() * Math.PI * 2, baseY: def.pos[1] });
+  planets.push({ grp, body: grp, spin: def.spin, bob: def.seed, baseY: def.pos[1] });
+}
+
+[
+  { r: 0.62, col: 0xb8a8d0, pos: [-5.5, 4.8, -6.5], spin: 0.1, flowers: 5, sprig: true, volcano: true, ring: null, seed: 1.3 },   // B612 itself, lavender
+  { r: 0.4, col: 0xa8d8c8, pos: [6.2, 5.6, -3.5], spin: 0.16, flowers: 3, sprig: false, volcano: false, ring: null, seed: 2.7 },
+  { r: 0.52, col: 0xf0c8a0, pos: [4.5, 7.4, -9], spin: 0.08, flowers: 4, sprig: true, volcano: false, ring: 0xf0d8a0, seed: 4.1 },
+  { r: 0.28, col: 0xf0d060, pos: [-6.8, 6.8, 2.5], spin: 0.22, flowers: 2, sprig: false, volcano: false, ring: null, seed: 5.9 },  // little yellow moon
+  { r: 0.44, col: 0xe8a8b8, pos: [7.5, 4.2, 4.5], spin: 0.13, flowers: 4, sprig: false, volcano: true, ring: 0xc8e8f0, seed: 7.2 },
+  { r: 0.3, col: 0xa8c0e8, pos: [-3.5, 8.2, 6.5], spin: 0.19, flowers: 2, sprig: true, volcano: false, ring: null, seed: 8.8 },
+  { r: 0.36, col: 0xd0e8a8, pos: [0.5, 9.0, -4], spin: 0.15, flowers: 3, sprig: false, volcano: false, ring: null, seed: 10.4 },
+].forEach(makeB612);
+
+// hand-drawn golden star sprinkles, like ink stars on the page
+{
+  const c = document.createElement('canvas');
+  c.width = c.height = 64;
+  const g = c.getContext('2d');
+  g.fillStyle = '#f0d060';
+  g.translate(32, 32);
+  g.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const rr = i % 2 === 0 ? 24 : 9;
+    const a = i / 10 * Math.PI * 2 - Math.PI / 2;
+    g.lineTo(Math.cos(a) * rr, Math.sin(a) * rr);
+  }
+  g.closePath();
+  g.fill();
+  const starTex = new THREE.CanvasTexture(c);
+  starTex.colorSpace = THREE.SRGBColorSpace;
+  for (let i = 0; i < 24; i++) {
+    const m = new THREE.SpriteMaterial({
+      map: starTex, transparent: true, opacity: 0.75 + (i % 3) * 0.08,
+      blending: THREE.AdditiveBlending, depthWrite: false,
+    });
+    const sp = new THREE.Sprite(m);
+    const s = 0.1 + (i % 4) * 0.05;
+    sp.scale.set(s, s, 1);
+    const a = i / 24 * Math.PI * 2;
+    sp.position.set(
+      Math.cos(a) * (6 + (i % 5) * 1.6),
+      2.4 + ((i * 1.63) % 6.5),
+      Math.sin(a) * (6 + (i % 5) * 1.6)
+    );
+    scene.add(sp);
+  }
+}
+
+// one small sunset at the edge of the dark sea — B612 always had time for sunsets
+{
+  const c = document.createElement('canvas');
+  c.width = 256; c.height = 256;
+  const g = c.getContext('2d');
+  const grad = g.createRadialGradient(128, 128, 8, 128, 128, 128);
+  grad.addColorStop(0, 'rgba(255,240,210,1)');
+  grad.addColorStop(0.25, 'rgba(255,178,110,0.85)');
+  grad.addColorStop(0.6, 'rgba(232,120,138,0.35)');
+  grad.addColorStop(1, 'rgba(232,120,138,0)');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, 256, 256);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  const sunset = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: tex, transparent: true, opacity: 0.95,
+    blending: THREE.AdditiveBlending, depthWrite: false, fog: false,
+  }));
+  sunset.scale.set(9, 9, 1);
+  sunset.position.set(-14, 1.2, -21);
+  scene.add(sunset);
+  // its long reflection reaching across the water
+  const refl = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.4, 26),
+    new THREE.MeshBasicMaterial({
+      color: 0xff9a6a, transparent: true, opacity: 0.12,
+      blending: THREE.AdditiveBlending, depthWrite: false,
+    })
+  );
+  refl.rotation.x = -Math.PI / 2;
+  refl.rotation.z = 0.6;
+  refl.position.set(-8, 0.006, -12);
+  scene.add(refl);
 }
 
 // floating paper lanterns
@@ -445,11 +650,7 @@ window.addEventListener('keydown', (e) => {
   }
 });
 
-if (hint) {
-  hint.textContent = IS_TOUCH
-    ? 'you found it · photos orbit · tap the mailbox for a letter'
-    : 'you found it · click a photo · the mailbox holds letters · esc leaves quietly';
-}
+if (hint) hint.textContent = 'welcome to our pocket universe (first try)';
 
 const clock = new THREE.Clock();
 const _fwd = new THREE.Vector3();
@@ -461,6 +662,7 @@ function animate() {
   controls.update();
   for (const fn of updatables) fn(t, dt);
   globe.rotation.y += dt * 0.12;
+  clouds.rotation.y += dt * 0.155;
   for (const p of planets) {
     p.body.rotation.y += dt * p.spin;
     if (!REDUCED_MOTION) p.grp.position.y = p.baseY + Math.sin(t * 0.3 + p.bob) * 0.12;
