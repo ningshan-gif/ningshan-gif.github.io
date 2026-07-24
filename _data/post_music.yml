@@ -1,15 +1,7 @@
-# Songs attached to Instagram posts, keyed by post shortcode.
-# The room resolves each entry to a ~30s iTunes preview and plays it when the
-# post is opened. Posts with a real MP3 in /audio/<shortcode>.mp3 ignore this
-# file (the local file wins).
-#
-# The shortcode is the bit in the instagram.com/p/<SHORTCODE>/ URL, and also
-# the image filename under images/instagram/.
-#
-# Format:  SHORTCODE: "song name artist name"
-# Example: Da3xAc1j9h2: "Rill Rill Sleigh Bells"
-#
-# (Instagram only reveals attached-song names for reels when scraped anonymously,
-#  so photo-post songs need to be listed here by hand. Future reels with named
-#  songs are added automatically by scripts/sync_instagram.py.)
-{}
+DZrS8RBleym: One Day Future Islands
+DaDj_J-G_uu: By My Side RADWIMPS
+DaOXtHoEraV: Bluebird Sunset Rollercoaster
+DaOZDnfErJ2: odoriko Vaundy
+DaOZXApkpuR: Yellow Coldplay
+Daq9qfLE4bU: Chi Li Shiang Jay Chou
+Dav8J4_ElWV: a thousand years Christina Perri

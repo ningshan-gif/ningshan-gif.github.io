@@ -114,6 +114,71 @@ guitar.position.set(-2.2, 0.3, -5.8);
 guitar.rotation.y = 0.5;
 scene.add(guitar);
 
+// ---------- dreamcore: floating pastel star-motes + big soft wisps ----------
+function glowSprite(size) {
+  const c = document.createElement('canvas');
+  c.width = c.height = size;
+  const g = c.getContext('2d');
+  const grad = g.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+  grad.addColorStop(0, 'rgba(255,255,255,1)');
+  grad.addColorStop(0.35, 'rgba(255,255,255,0.55)');
+  grad.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, size, size);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+const MOTES = 96;
+const motePos = new Float32Array(MOTES * 3);
+const moteCol = new Float32Array(MOTES * 3);
+const moteSeed = [];
+const PASTELS = [
+  [1.0, 0.79, 0.63], [0.91, 0.69, 0.78], [0.68, 0.63, 0.9],
+  [0.63, 0.87, 0.82], [1.0, 0.92, 0.75],
+];
+for (let i = 0; i < MOTES; i++) {
+  motePos[i * 3] = (Math.random() * 2 - 1) * 7.4;
+  motePos[i * 3 + 1] = 0.3 + Math.random() * 5.4;
+  motePos[i * 3 + 2] = (Math.random() * 2 - 1) * 7.4;
+  const c = PASTELS[i % PASTELS.length];
+  moteCol[i * 3] = c[0]; moteCol[i * 3 + 1] = c[1]; moteCol[i * 3 + 2] = c[2];
+  moteSeed.push([Math.random() * Math.PI * 2, 0.05 + Math.random() * 0.12]);
+}
+const moteGeo = new THREE.BufferGeometry();
+moteGeo.setAttribute('position', new THREE.BufferAttribute(motePos, 3));
+moteGeo.setAttribute('color', new THREE.BufferAttribute(moteCol, 3));
+const moteMat = new THREE.PointsMaterial({
+  size: 0.13, map: glowSprite(64), transparent: true, opacity: 0.85,
+  vertexColors: true, blending: THREE.AdditiveBlending, depthWrite: false,
+});
+const motes = new THREE.Points(moteGeo, moteMat);
+scene.add(motes);
+
+const wisps = [];
+const wispTex = glowSprite(128);
+for (let i = 0; i < 7; i++) {
+  const c = PASTELS[i % PASTELS.length];
+  const sm = new THREE.SpriteMaterial({
+    map: wispTex, transparent: true, opacity: 0.35,
+    color: new THREE.Color(c[0], c[1], c[2]),
+    blending: THREE.AdditiveBlending, depthWrite: false,
+  });
+  const sp = new THREE.Sprite(sm);
+  const s = 0.35 + Math.random() * 0.35;
+  sp.scale.set(s, s, 1);
+  scene.add(sp);
+  wisps.push({
+    sp, mat: sm,
+    ax: (Math.random() * 2 - 1) * 5.5, az: (Math.random() * 2 - 1) * 5.5,
+    ay: 1.2 + Math.random() * 3.6,
+    rx: 0.8 + Math.random() * 1.6, ry: 0.4 + Math.random() * 0.8,
+    sx: 0.05 + Math.random() * 0.1, sy: 0.07 + Math.random() * 0.09,
+    ph: Math.random() * Math.PI * 2,
+  });
+}
+
 // ---------- video wall ----------
 const WALL = { cols: 4, rows: 3, x0: -3.3, x1: 3.3, y0: 1.05, y1: 4.95, z: -7.84 };
 const PER_PAGE = WALL.cols * WALL.rows;
@@ -385,6 +450,27 @@ function animate() {
   for (const fn of updatables) fn(t, dt);
   // ember flicker
   fireGlow.intensity = 14 + Math.sin(t * 9.1) * 1.6 + Math.sin(t * 23.7) * 0.9;
+
+  // dream-light: motes rise and sway, wisps drift on slow orbits
+  if (!REDUCED_MOTION) {
+    const pos = moteGeo.attributes.position;
+    for (let i = 0; i < MOTES; i++) {
+      let y = pos.getY(i) + moteSeed[i][1] * dt;
+      if (y > 5.8) y = 0.25;
+      pos.setY(i, y);
+      pos.setX(i, pos.getX(i) + Math.sin(t * 0.32 + moteSeed[i][0]) * 0.0009);
+    }
+    pos.needsUpdate = true;
+    moteMat.opacity = 0.75 + Math.sin(t * 0.8) * 0.15;
+    for (const w of wisps) {
+      w.sp.position.set(
+        w.ax + Math.sin(t * w.sx + w.ph) * w.rx,
+        w.ay + Math.sin(t * w.sy + w.ph * 2) * w.ry,
+        w.az + Math.cos(t * w.sx + w.ph) * w.rx
+      );
+      w.mat.opacity = 0.28 + Math.sin(t * 0.5 + w.ph) * 0.1;
+    }
+  }
 
   const target = playerState.active ? 1 : 0;
   playerState.open += (target - playerState.open) * Math.min(1, dt * 6);
