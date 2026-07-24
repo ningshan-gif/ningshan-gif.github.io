@@ -19,6 +19,63 @@ In 2018, I started the first all-girls robotics team in China. I had been doing 
 Today marks the 6th year birthday of Mulan. I have found my family through this team who will come to my university graduation in ten days. Team Mulan is not just a robotics team, to me, it is my youth, a waving flag, something that makes me shine, it was Mulan's battle in which I continued to fight.
 
 
+The timeline below traces the team's path from founding to today.
+
+<div style="background:#fbfaf7;border:1px solid #e8e4da;border-radius:12px;padding:18px 18px 8px">
+<svg viewBox="0 0 740 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Timeline of Team Mulan milestones from 2018 to 2023" style="max-width:100%;height:auto;display:block;margin:1.4rem auto">
+  <defs>
+    <marker id="mulanTlArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#9aa4b5"/>
+    </marker>
+  </defs>
+  <g font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+    <line x1="25" y1="165" x2="700" y2="165" stroke="#9aa4b5" stroke-width="2" marker-end="url(#mulanTlArrow)"/>
+
+    <rect x="16" y="30" width="138" height="92" rx="10" fill="#eef2f7" stroke="#7a93c4" stroke-width="1.5"/>
+    <text x="85" y="54" text-anchor="middle" font-size="15" font-weight="700" fill="#3d4656">2018</text>
+    <text x="85" y="76" text-anchor="middle" font-size="12" fill="#3d4656">Team Mulan founded</text>
+    <text x="85" y="93" text-anchor="middle" font-size="12" fill="#3d4656">Rookie All-Star,</text>
+    <text x="85" y="110" text-anchor="middle" font-size="12" fill="#3d4656">highest-ranked rookie</text>
+    <line x1="85" y1="122" x2="85" y2="157" stroke="#7a93c4" stroke-width="1.5"/>
+    <circle cx="85" cy="165" r="6" fill="#7a93c4" stroke="#fbfaf7" stroke-width="2"/>
+
+    <rect x="158" y="206" width="138" height="122" rx="10" fill="#fdf3f3" stroke="#d98a9e" stroke-width="1.5"/>
+    <text x="227" y="230" text-anchor="middle" font-size="15" font-weight="700" fill="#3d4656">2019</text>
+    <text x="227" y="252" text-anchor="middle" font-size="12" fill="#3d4656">Rookie All-Star,</text>
+    <text x="227" y="269" text-anchor="middle" font-size="12" fill="#3d4656">Highest Rookie Seed,</text>
+    <text x="227" y="286" text-anchor="middle" font-size="12" fill="#3d4656">Rookie Inspiration,</text>
+    <text x="227" y="303" text-anchor="middle" font-size="12" fill="#3d4656">Dean's List Award,</text>
+    <text x="227" y="320" text-anchor="middle" font-size="12" fill="#3d4656">Worlds in Houston</text>
+    <line x1="227" y1="173" x2="227" y2="206" stroke="#d98a9e" stroke-width="1.5"/>
+    <circle cx="227" cy="165" r="6" fill="#d98a9e" stroke="#fbfaf7" stroke-width="2"/>
+
+    <rect x="300" y="30" width="138" height="92" rx="10" fill="#eef7f1" stroke="#7ab89a" stroke-width="1.5"/>
+    <text x="369" y="54" text-anchor="middle" font-size="15" font-weight="700" fill="#3d4656">2020</text>
+    <text x="369" y="76" text-anchor="middle" font-size="12" fill="#3d4656">COVID pivot online:</text>
+    <text x="369" y="93" text-anchor="middle" font-size="12" fill="#3d4656">CAD classes, talks,</text>
+    <text x="369" y="110" text-anchor="middle" font-size="12" fill="#3d4656">Pink Alliance formed</text>
+    <line x1="369" y1="122" x2="369" y2="157" stroke="#7ab89a" stroke-width="1.5"/>
+    <circle cx="369" cy="165" r="6" fill="#7ab89a" stroke="#fbfaf7" stroke-width="2"/>
+
+    <rect x="442" y="206" width="138" height="76" rx="10" fill="#fff8ea" stroke="#d9b56a" stroke-width="1.5"/>
+    <text x="511" y="230" text-anchor="middle" font-size="15" font-weight="700" fill="#3d4656">2021</text>
+    <text x="511" y="252" text-anchor="middle" font-size="12" fill="#3d4656">Finalist, Robotics</text>
+    <text x="511" y="269" text-anchor="middle" font-size="12" fill="#3d4656">China Competition</text>
+    <line x1="511" y1="173" x2="511" y2="206" stroke="#d9b56a" stroke-width="1.5"/>
+    <circle cx="511" cy="165" r="6" fill="#d9b56a" stroke="#fbfaf7" stroke-width="2"/>
+
+    <rect x="584" y="30" width="138" height="92" rx="10" fill="#eef2f7" stroke="#7a93c4" stroke-width="1.5"/>
+    <text x="653" y="54" text-anchor="middle" font-size="15" font-weight="700" fill="#3d4656">2023</text>
+    <text x="653" y="76" text-anchor="middle" font-size="12" fill="#3d4656">Founder → Captain</text>
+    <text x="653" y="93" text-anchor="middle" font-size="12" fill="#3d4656">→ Coach</text>
+    <text x="653" y="110" text-anchor="middle" font-size="12" fill="#3d4656">100+ girl alumnae</text>
+    <line x1="653" y1="122" x2="653" y2="157" stroke="#7a93c4" stroke-width="1.5"/>
+    <circle cx="653" cy="165" r="6" fill="#7a93c4" stroke="#fbfaf7" stroke-width="2"/>
+  </g>
+</svg>
+<p style="font-size:0.85em;color:#6a7280;text-align:center;margin:8px 0 6px">Figure: Team Mulan's trajectory, from founding in 2018 to the World Championship and beyond.</p>
+</div>
+
 ## 2018
 
 The following pictures were taken when we participated in our Robotics China Competition in summer 2018. We won Rookie All Star and was the highest ranking rookie team in the competition.
@@ -143,6 +200,53 @@ Enough personal story.  Fact was, I decided to start a new team. Most robotics t
 That sounds great Ningshan! But how do you start a team? You would need the people, the coaches, a space for working on the robot, and a whole lot of money from sponsors to build the robot! 
 
 Looking back it's crazy how you managed to do it all, with friends and teammates, you got sponsors from both NGO and companies that supported women's growth (United Technology Corporations).
+
+The contrast below shows what starting an unaffiliated team actually required.
+
+<div style="background:#fbfaf7;border:1px solid #e8e4da;border-radius:12px;padding:18px 18px 8px">
+<svg viewBox="0 0 740 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram contrasting a typical school- or company-affiliated FIRST team with Team Mulan's independently assembled resources" style="max-width:100%;height:auto;display:block;margin:1.4rem auto">
+  <defs>
+    <marker id="mulanBdArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#9aa4b5"/>
+    </marker>
+  </defs>
+  <g font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+    <line x1="345" y1="24" x2="345" y2="280" stroke="#d8dde5" stroke-width="1.5" stroke-dasharray="4 4"/>
+
+    <text x="175" y="32" text-anchor="middle" font-size="15" font-weight="700" fill="#3d4656">A typical FIRST team</text>
+    <rect x="75" y="50" width="200" height="44" rx="10" fill="#eef2f7" stroke="#7a93c4" stroke-width="1.5"/>
+    <text x="175" y="77" text-anchor="middle" font-size="13.5" fill="#3d4656">School or company</text>
+    <path d="M175,94 L175,172" stroke="#9aa4b5" stroke-width="1.8" fill="none" marker-end="url(#mulanBdArrow)"/>
+    <text x="186" y="126" text-anchor="start" font-size="12" fill="#6a7280">provides workspace,</text>
+    <text x="186" y="142" text-anchor="start" font-size="12" fill="#6a7280">funding, mentors</text>
+    <rect x="100" y="178" width="150" height="44" rx="10" fill="#eef2f7" stroke="#7a93c4" stroke-width="1.5"/>
+    <text x="175" y="205" text-anchor="middle" font-size="13.5" fill="#3d4656">Team</text>
+    <text x="175" y="252" text-anchor="middle" font-size="12" fill="#6a7280">one affiliation supplies everything</text>
+
+    <text x="550" y="32" text-anchor="middle" font-size="15" font-weight="700" fill="#3d4656">Team Mulan — independent</text>
+    <rect x="377" y="50" width="78" height="40" rx="9" fill="#fdf3f3" stroke="#d98a9e" stroke-width="1.5"/>
+    <text x="416" y="75" text-anchor="middle" font-size="12.5" fill="#3d4656">People</text>
+    <rect x="463" y="50" width="78" height="40" rx="9" fill="#eef7f1" stroke="#7ab89a" stroke-width="1.5"/>
+    <text x="502" y="75" text-anchor="middle" font-size="12.5" fill="#3d4656">Coaches</text>
+    <rect x="549" y="50" width="78" height="40" rx="9" fill="#fff8ea" stroke="#d9b56a" stroke-width="1.5"/>
+    <text x="588" y="75" text-anchor="middle" font-size="12.5" fill="#3d4656">Workspace</text>
+    <rect x="635" y="50" width="78" height="40" rx="9" fill="#eef2f7" stroke="#7a93c4" stroke-width="1.5"/>
+    <text x="674" y="75" text-anchor="middle" font-size="12.5" fill="#3d4656">Sponsors</text>
+
+    <path d="M416,90 C416,140 495,138 495,174" stroke="#9aa4b5" stroke-width="1.6" fill="none" marker-end="url(#mulanBdArrow)"/>
+    <path d="M502,90 C502,128 532,132 532,174" stroke="#9aa4b5" stroke-width="1.6" fill="none" marker-end="url(#mulanBdArrow)"/>
+    <path d="M588,90 C588,128 568,132 568,174" stroke="#9aa4b5" stroke-width="1.6" fill="none" marker-end="url(#mulanBdArrow)"/>
+    <path d="M674,90 C674,140 605,138 605,174" stroke="#9aa4b5" stroke-width="1.6" fill="none" marker-end="url(#mulanBdArrow)"/>
+
+    <rect x="460" y="180" width="180" height="48" rx="10" fill="#fdf3f3" stroke="#d98a9e" stroke-width="1.8"/>
+    <text x="550" y="200" text-anchor="middle" font-size="15" font-weight="700" fill="#3d4656">Team Mulan</text>
+    <text x="550" y="217" text-anchor="middle" font-size="12" fill="#6a7280">founded 2018</text>
+    <text x="550" y="254" text-anchor="middle" font-size="12" fill="#6a7280">no school or company affiliation;</text>
+    <text x="550" y="270" text-anchor="middle" font-size="12" fill="#6a7280">backed by NGOs &amp; companies supporting women's growth</text>
+  </g>
+</svg>
+<p style="font-size:0.85em;color:#6a7280;text-align:center;margin:8px 0 6px">Figure: Unlike school- or company-backed teams, Team Mulan had to assemble every resource on its own.</p>
+</div>
 
 (TO BE CONTINUED)
 
