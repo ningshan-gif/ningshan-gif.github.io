@@ -2,8 +2,8 @@
 // of performance videos (@otonoori). Completely different mood from the tatami room.
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { buildDrums } from './drums.js';
-import { buildGuitar } from './guitar.js';
+import { buildDrums } from './drums.js?v=6';
+import { buildGuitar } from './guitar.js?v=6';
 
 const canvasHost = document.getElementById('room-canvas');
 const overlay = document.getElementById('room-loading');
@@ -89,7 +89,7 @@ scene.add(moonlight, moonlight.target);
 const updatables = [];
 let exitDoor = null;
 
-import('./stage.js').then(m => {
+import('./stage.js?v=6').then(m => {
   const stage = m.buildStage(THREE);
   scene.add(stage);
   if (stage.userData && typeof stage.userData.update === 'function') updatables.push(stage.userData.update);
@@ -248,7 +248,7 @@ const prevArrow = arrowMesh(-1);
 let videos = [];  // {code, caption, video, poster}
 let page = 0;
 
-fetch('/music-room.json')
+fetch('/music-room.json?t=' + Math.floor(Date.now() / 600000))
   .then(r => r.json())
   .then(data => {
     const byCode = new Map();

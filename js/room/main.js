@@ -2,11 +2,11 @@
 // Builders live in ./: shell, guitar, dog, desk, fruits — each exports build*(THREE) -> Group.
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { buildShell } from './shell.js';
-import { buildGuitar } from './guitar.js';
-import { buildDog } from './dog.js';
-import { buildDesk } from './desk.js';
-import { buildFruits } from './fruits.js';
+import { buildShell } from './shell.js?v=6';
+import { buildGuitar } from './guitar.js?v=6';
+import { buildDog } from './dog.js?v=6';
+import { buildDesk } from './desk.js?v=6';
+import { buildFruits } from './fruits.js?v=6';
 
 const canvasHost = document.getElementById('room-canvas');
 const overlay = document.getElementById('room-loading');
@@ -68,6 +68,8 @@ controls.maxPolarAngle = 1.62;
 controls.autoRotate = !REDUCED_MOTION;
 controls.autoRotateSpeed = 0.35;
 renderer.domElement.addEventListener('pointerdown', () => { controls.autoRotate = false; }, { once: true });
+// unlock audio at the very first touch anywhere — costs nothing on desktop
+window.addEventListener('pointerdown', () => { primeMusic(); }, { once: true });
 
 // ---------- lights ----------
 scene.add(new THREE.HemisphereLight(0xffe2b4, 0x5e3d24, 0.55));
@@ -104,7 +106,7 @@ place(buildFruits(THREE), 4.9, 0.7, 0);
 place(buildDog(THREE), -1.15, 1.95, -0.22);
 
 // Optional modules (drums, plants, art) — the room still works while they don't exist yet.
-Promise.allSettled([import('./drums.js'), import('./plants.js'), import('./art.js')]).then(([d, p, a]) => {
+Promise.allSettled([import('./drums.js?v=6'), import('./plants.js?v=6'), import('./art.js?v=6')]).then(([d, p, a]) => {
   if (a.status === 'fulfilled') place(a.value.buildArt(THREE), 0, 0, 0);
   if (d.status === 'fulfilled') place(d.value.buildDrums(THREE), -3.35, -4.65, 0.5);
   if (p.status === 'fulfilled') {
@@ -524,7 +526,7 @@ function stopMusic(immediate) {
   }
 }
 
-fetch('/room-posts.json')
+fetch('/room-posts.json?t=' + Math.floor(Date.now() / 600000))
   .then(r => r.json())
   .then(data => {
     const posts = data.posts || data; // tolerate the old flat-array shape
