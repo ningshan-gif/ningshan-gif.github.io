@@ -2,11 +2,11 @@
 // Builders live in ./: shell, guitar, dog, desk, fruits — each exports build*(THREE) -> Group.
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { buildShell } from './shell.js?v=8';
-import { buildGuitar } from './guitar.js?v=8';
-import { buildDog } from './dog.js?v=8';
-import { buildDesk } from './desk.js?v=8';
-import { buildFruits } from './fruits.js?v=8';
+import { buildShell } from './shell.js?v=9';
+import { buildGuitar } from './guitar.js?v=9';
+import { buildDog } from './dog.js?v=9';
+import { buildDesk } from './desk.js?v=9';
+import { buildFruits } from './fruits.js?v=9';
 
 const canvasHost = document.getElementById('room-canvas');
 const overlay = document.getElementById('room-loading');
@@ -110,7 +110,7 @@ place(buildFruits(THREE), 4.9, 0.7, 0);
 place(buildDog(THREE), -1.15, 1.95, -0.22);
 
 // Optional modules (drums, plants, art) — the room still works while they don't exist yet.
-Promise.allSettled([import('./drums.js?v=8'), import('./plants.js?v=8'), import('./art.js?v=8')]).then(([d, p, a]) => {
+Promise.allSettled([import('./drums.js?v=9'), import('./plants.js?v=9'), import('./art.js?v=9')]).then(([d, p, a]) => {
   if (a.status === 'fulfilled') place(a.value.buildArt(THREE), 0, 0, 0);
   if (d.status === 'fulfilled') place(d.value.buildDrums(THREE), -3.35, -4.65, 0.5);
   if (p.status === 'fulfilled') {
@@ -453,11 +453,16 @@ function captionOf(post) {
   return t;
 }
 
-// titles were historically truncated by the sync — the full caption lives in
-// the post body (caption text + a trailing attribution line we strip off)
+const POST_CAPTIONS = {}; // shortcode -> full caption straight from Instagram
+
+// titles were historically truncated by the sync — prefer the caption captured
+// from Instagram itself, then the post body, then the title
 function fullCaptionOf(post) {
   const t = captionOf(post);
   if (isWriting(post)) return t; // writings show their text as the book
+  const sc = shortcodeOf(post);
+  const igCap = sc && POST_CAPTIONS[sc];
+  if (igCap) return igCap;
   let b = String(post.body || '');
   if (!b.trim()) return t;
   b = b.replace(/@[\w.]+\s*·[^\n]*$/m, '');      // trailing attribution line
@@ -589,6 +594,7 @@ fetch('/room-posts.json?t=' + Math.floor(Date.now() / 600000))
     (data.audio || []).forEach(sc => AUDIO_SHORTCODES.add(sc));
     Object.assign(MUSIC_QUERIES, data.music || {});
     Object.assign(MUSIC_META, data.musicMeta || {});
+    Object.assign(POST_CAPTIONS, data.captions || {});
     buildGalleryMap(data.gallery || []);
     // newest first; every post hangs on a wall (zone capacity >= post count)
     posts.sort((a, b) => (b.ts || 0) - (a.ts || 0));
