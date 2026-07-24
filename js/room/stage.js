@@ -385,51 +385,34 @@ export function buildStage(THREE) {
     log.rotation.z = lw[3];
   }
 
-  // ---------- 6. LOUNGE SET on layered round rugs ----------
+  // ---------- 6. LOUNGE SET on a light modern rug ----------
+  // big soft light-gray round rug, minimal — one thin blush ring for warmth
   const rugTex = canvasTex(512, 512, (ctx, w, h) => {
     const cx = 256, cy = 256;
-    ctx.fillStyle = '#6e3128'; ctx.fillRect(0, 0, w, h);
-    const rings = [
-      [252, '#c9b294'], [240, '#7a3a32'], [216, '#8a4a3a'], [202, '#c9b294'],
-      [194, '#6e3128'], [152, '#8a4a3a'], [144, '#c9b294'], [138, '#7a3a32'],
-      [72, '#8a4a3a'], [62, '#c9b294'], [52, '#6e3128']
-    ];
-    for (const rr of rings) {
-      ctx.fillStyle = rr[1];
-      ctx.beginPath(); ctx.arc(cx, cy, rr[0], 0, PI * 2); ctx.fill();
-    }
-    // radial ticks
-    ctx.strokeStyle = '#c9b294'; ctx.lineWidth = 3;
-    for (let i = 0; i < 36; i++) {
-      const a = i / 36 * PI * 2;
-      ctx.beginPath();
-      ctx.moveTo(cx + Math.cos(a) * 158, cy + Math.sin(a) * 158);
-      ctx.lineTo(cx + Math.cos(a) * 186, cy + Math.sin(a) * 186);
-      ctx.stroke();
-    }
-    // center medallion diamonds
-    ctx.fillStyle = '#7a3a32';
-    for (let i = 0; i < 8; i++) {
-      const a = i / 8 * PI * 2;
-      const dx = cx + Math.cos(a) * 34, dy = cy + Math.sin(a) * 34;
-      ctx.beginPath();
-      ctx.moveTo(dx, dy - 10); ctx.lineTo(dx + 8, dy); ctx.lineTo(dx, dy + 10); ctx.lineTo(dx - 8, dy);
-      ctx.closePath(); ctx.fill();
-    }
-    // subtle dot border
-    ctx.fillStyle = '#5c2a24';
-    for (let i = 0; i < 48; i++) {
-      const a = i / 48 * PI * 2;
-      ctx.beginPath();
-      ctx.arc(cx + Math.cos(a) * 228, cy + Math.sin(a) * 228, 4, 0, PI * 2);
-      ctx.fill();
+    const grad = ctx.createRadialGradient(cx, cy, 40, cx, cy, 252);
+    grad.addColorStop(0, '#e2e2e6');
+    grad.addColorStop(1, '#cfd0d6');
+    ctx.fillStyle = grad;
+    ctx.beginPath(); ctx.arc(cx, cy, 252, 0, PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(232,184,200,0.55)'; // blush ring
+    ctx.lineWidth = 8;
+    ctx.beginPath(); ctx.arc(cx, cy, 210, 0, PI * 2); ctx.stroke();
+    ctx.strokeStyle = 'rgba(160,162,172,0.5)';
+    ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.arc(cx, cy, 246, 0, PI * 2); ctx.stroke();
+    // soft speckle so it reads as wool
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    for (let i = 0; i < 260; i++) {
+      const a = Math.random() * PI * 2, rr = Math.sqrt(Math.random()) * 246;
+      ctx.fillRect(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr, 2, 2);
     }
   });
   const rug = mesh(new THREE.CircleGeometry(2.4, 40), STD({ map: rugTex, roughness: 0.95 }), 0.6, 0.012, 0.8, false, true);
   rug.rotation.x = -PI / 2;
+  // small pastel mint accent rug by the stove
   const rug2Tex = canvasTex(256, 256, (ctx, w, h) => {
-    ctx.fillStyle = '#5a6a42'; ctx.fillRect(0, 0, w, h);
-    const rings = [[124, '#c9b294'], [112, '#5a6a42'], [84, '#8a9a6a'], [72, '#5a6a42'], [34, '#c9b294'], [26, '#5a6a42']];
+    ctx.fillStyle = '#c8dcd0'; ctx.fillRect(0, 0, w, h);
+    const rings = [[124, '#dce8e0'], [104, '#c8dcd0'], [64, '#dce8e0'], [44, '#c8dcd0']];
     for (const rr of rings) {
       ctx.fillStyle = rr[1];
       ctx.beginPath(); ctx.arc(128, 128, rr[0], 0, PI * 2); ctx.fill();
@@ -438,30 +421,44 @@ export function buildStage(THREE) {
   const rug2 = mesh(new THREE.CircleGeometry(0.95, 28), STD({ map: rug2Tex, roughness: 0.95 }), 2.7, 0.02, -0.9, false, true);
   rug2.rotation.x = -PI / 2;
 
-  // small mustard loveseat (two seats), opening toward the stage — intimate, not grand
-  const sofa = new THREE.Group();
-  sofa.position.set(1.1, 0, 1.2);
-  sofa.rotation.y = PI + 0.15;
-  g.add(sofa);
-  boxM(1.34, 0.18, 0.66, walnutDark, 0, 0.09, 0, false, false, sofa);
-  boxM(1.42, 0.34, 0.72, mustardMat, 0, 0.35, 0, true, true, sofa);
-  const loveBack = boxM(1.42, 0.6, 0.24, mustardMat, 0, 0.74, 0.3, true, false, sofa);
-  loveBack.rotation.x = 0.14;
-  for (const sx of [-0.76, 0.76]) {
-    const arm = mesh(new THREE.CapsuleGeometry(0.12, 0.44, 6, 12), mustardMat, sx, 0.5, 0.02, true, false, sofa);
-    arm.rotation.x = PI / 2;
+  // no sofa — a nest of floor seating: bean bags, poufs, fluffy patches, cushions
+  function beanBag(mat, x, z, ry, s) {
+    const bb = new THREE.Group();
+    bb.position.set(x, 0, z);
+    bb.rotation.y = ry;
+    g.add(bb);
+    const body = mesh(new THREE.SphereGeometry(0.42 * s, 20, 14), mat, 0, 0.3 * s, 0, true, true, bb);
+    body.scale.set(1, 0.78, 1);
+    const back = mesh(new THREE.SphereGeometry(0.3 * s, 16, 12), mat, 0, 0.5 * s, -0.22 * s, true, false, bb);
+    back.scale.set(1, 0.9, 0.7);
+    const dent = mesh(new THREE.SphereGeometry(0.26 * s, 14, 10), mat, 0, 0.34 * s, 0.1 * s, false, false, bb);
+    dent.scale.set(1, 0.35, 1);
+    return bb;
   }
-  const pw1 = boxM(0.4, 0.4, 0.14, rustMat, -0.32, 0.66, 0.22, true, false, sofa);
-  pw1.rotation.set(0.32, 0.1, -0.1);
-  const pw2 = boxM(0.4, 0.4, 0.14, creamMat, 0.34, 0.66, 0.22, true, false, sofa);
-  pw2.rotation.set(0.3, -0.12, 0.12);
-  // floor poufs + cushions by the fire and table — the cozy seats
-  const pouf1 = mesh(new THREE.CylinderGeometry(0.34, 0.38, 0.3, 18), mossMat, -1.0, 0.15, 1.7, true, true);
-  const pouf2 = mesh(new THREE.CylinderGeometry(0.3, 0.34, 0.26, 18), navyMat, 2.6, 0.13, 0.3, true, true);
-  const fc1 = boxM(0.56, 0.12, 0.56, rustMat, 3.6, 0.06, -0.4, true, true);
-  fc1.rotation.y = 0.4;
-  const fc2 = boxM(0.52, 0.11, 0.52, creamMat, -0.4, 0.055, -0.9, true, true);
-  fc2.rotation.y = -0.3;
+  // pastel seat palette — soft and modern
+  const pastelRose = new THREE.MeshStandardMaterial({ color: 0xe8b8c8, roughness: 1 });
+  const pastelBlue = new THREE.MeshStandardMaterial({ color: 0xb8cce8, roughness: 1 });
+  const pastelMint = new THREE.MeshStandardMaterial({ color: 0xbcd8c8, roughness: 1 });
+  const pastelButter = new THREE.MeshStandardMaterial({ color: 0xf0e4b8, roughness: 1 });
+  beanBag(pastelButter, 0.9, 1.0, PI + 0.2, 1.0);  // facing the stage
+  beanBag(pastelMint, -0.9, 1.6, PI - 0.3, 0.9);
+  beanBag(pastelRose, 4.0, 0.2, PI * 0.72, 0.85);  // by the stove
+  // fluffy shag patches (thick soft discs) to sink into
+  const fluffCream = new THREE.MeshStandardMaterial({ color: 0xf6f0e6, roughness: 1 });
+  const fluffRose = new THREE.MeshStandardMaterial({ color: 0xecd4d8, roughness: 1 });
+  const fl1 = mesh(new THREE.CylinderGeometry(0.62, 0.66, 0.09, 22), fluffCream, 0.1, 0.045, 2.2, false, true);
+  const fl2 = mesh(new THREE.CylinderGeometry(0.5, 0.54, 0.08, 20), fluffRose, 2.2, 0.04, 1.6, false, true);
+  const fl3 = mesh(new THREE.CylinderGeometry(0.44, 0.48, 0.08, 20), fluffCream, -1.7, 0.04, 0.4, false, true);
+  // scattered pastel cushions
+  const cushionSpecs = [
+    [pastelRose, 3.6, -0.4, 0.4], [fluffCream, -0.4, -0.9, -0.3],
+    [pastelBlue, 1.7, 2.4, 0.8], [pastelMint, -0.2, 1.1, 0.2],
+  ];
+  for (const cs of cushionSpecs) {
+    const fc = boxM(0.52, 0.11, 0.52, cs[0], cs[1], 0.055, cs[2], true, true);
+    fc.rotation.y = cs[3];
+  }
+  const pouf2 = mesh(new THREE.CylinderGeometry(0.3, 0.34, 0.26, 18), pastelBlue, 2.6, 0.13, 0.3, true, true);
 
   // round wood coffee table + props
   cylM(0.55, 0.55, 0.08, 24, walnut, 0.6, 0.44, 0.8, true, true);

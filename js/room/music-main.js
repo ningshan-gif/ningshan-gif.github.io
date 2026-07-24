@@ -114,6 +114,19 @@ guitar.position.set(-2.2, 0.3, -5.8);
 guitar.rotation.y = 0.5;
 scene.add(guitar);
 
+// a second Strat in gloss black (the body extrude uses a material array;
+// swapping it turns the sunburst into a black one, pickguard stays white)
+const guitar2 = buildGuitar(THREE);
+guitar2.position.set(1.8, 0.3, -6.6);
+guitar2.rotation.y = -0.45;
+const blackBody = new THREE.MeshPhysicalMaterial({
+  color: 0x0e0e12, roughness: 0.22, clearcoat: 0.7, clearcoatRoughness: 0.25,
+});
+guitar2.traverse(o => {
+  if (o.isMesh && Array.isArray(o.material)) o.material = [blackBody, blackBody];
+});
+scene.add(guitar2);
+
 // ---------- dreamcore: floating pastel star-motes + big soft wisps ----------
 function glowSprite(size) {
   const c = document.createElement('canvas');
