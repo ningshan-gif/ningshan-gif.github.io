@@ -2,11 +2,11 @@
 // Builders live in ./: shell, guitar, dog, desk, fruits — each exports build*(THREE) -> Group.
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { buildShell } from './shell.js?v=9';
-import { buildGuitar } from './guitar.js?v=9';
-import { buildDog } from './dog.js?v=9';
-import { buildDesk } from './desk.js?v=9';
-import { buildFruits } from './fruits.js?v=9';
+import { buildShell } from './shell.js?v=10';
+import { buildGuitar } from './guitar.js?v=10';
+import { buildDog } from './dog.js?v=10';
+import { buildDesk } from './desk.js?v=10';
+import { buildFruits } from './fruits.js?v=10';
 
 const canvasHost = document.getElementById('room-canvas');
 const overlay = document.getElementById('room-loading');
@@ -46,9 +46,10 @@ const WRITING_HINT = IS_TOUCH
   : '← → or click a page to turn it · esc closes';
 if (hint) hint.textContent = BASE_HINT;
 
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, IS_TOUCH ? 1.5 : 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = true;
+// shadows are the single biggest cost on phones — the warm bake reads fine without them
+renderer.shadowMap.enabled = !IS_TOUCH;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.18;
@@ -110,7 +111,7 @@ place(buildFruits(THREE), 4.9, 0.7, 0);
 place(buildDog(THREE), -1.15, 1.95, -0.22);
 
 // Optional modules (drums, plants, art) — the room still works while they don't exist yet.
-Promise.allSettled([import('./drums.js?v=9'), import('./plants.js?v=9'), import('./art.js?v=9')]).then(([d, p, a]) => {
+Promise.allSettled([import('./drums.js?v=10'), import('./plants.js?v=10'), import('./art.js?v=10')]).then(([d, p, a]) => {
   if (a.status === 'fulfilled') place(a.value.buildArt(THREE), 0, 0, 0);
   if (d.status === 'fulfilled') place(d.value.buildDrums(THREE), -3.35, -4.65, 0.5);
   if (p.status === 'fulfilled') {
@@ -170,6 +171,108 @@ const musicSign = new THREE.Group();
   musicSign.rotation.y = 0.25;
   scene.add(musicSign);
 })();
+
+// ---------- the globe: a quiet door to the secret room ----------
+const SECRET_HASH = 'b7814f71f1913760dfd032701c80d7a84e4ad1a91a741432ee491b9da863023d';
+const secretModal = document.getElementById('secret-modal');
+const smPass = document.getElementById('sm-pass');
+const smGo = document.getElementById('sm-go');
+const smErr = document.getElementById('sm-err');
+const globeGroup = new THREE.Group();
+let globeSphere = null;
+(function buildGlobe() {
+  const c = document.createElement('canvas');
+  c.width = 512; c.height = 256;
+  const g = c.getContext('2d');
+  const w = 512, h = 256;
+  const sea = g.createLinearGradient(0, 0, 0, h);
+  sea.addColorStop(0, '#245072');
+  sea.addColorStop(1, '#1c3f5e');
+  g.fillStyle = sea;
+  g.fillRect(0, 0, w, h);
+  g.fillStyle = '#7a9a68';
+  const blob = (pts) => {
+    g.beginPath();
+    g.moveTo(pts[0][0] * w, pts[0][1] * h);
+    for (let i = 1; i < pts.length; i++) {
+      const a = pts[i - 1], b = pts[i];
+      g.quadraticCurveTo(a[0] * w, a[1] * h, (a[0] + b[0]) / 2 * w, (a[1] + b[1]) / 2 * h);
+    }
+    g.closePath();
+    g.fill();
+  };
+  blob([[0.08, 0.28], [0.16, 0.18], [0.24, 0.24], [0.27, 0.38], [0.22, 0.5], [0.12, 0.46], [0.06, 0.36]]);
+  blob([[0.24, 0.55], [0.3, 0.52], [0.32, 0.66], [0.28, 0.82], [0.24, 0.7]]);
+  blob([[0.44, 0.3], [0.52, 0.26], [0.56, 0.4], [0.52, 0.6], [0.46, 0.72], [0.42, 0.52], [0.42, 0.38]]);
+  blob([[0.5, 0.2], [0.62, 0.14], [0.78, 0.2], [0.86, 0.3], [0.78, 0.42], [0.66, 0.4], [0.56, 0.3]]);
+  blob([[0.78, 0.62], [0.86, 0.6], [0.88, 0.7], [0.8, 0.72]]);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  const wood = new THREE.MeshStandardMaterial({ color: 0x5a3a22, roughness: 0.6 });
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.22, 0.06, 20), wood);
+  base.position.y = 0.03;
+  base.castShadow = true;
+  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.03, 0.55, 12), wood);
+  stem.position.y = 0.33;
+  const ring = new THREE.Mesh(
+    new THREE.TorusGeometry(0.34, 0.016, 8, 40, Math.PI),
+    new THREE.MeshStandardMaterial({ color: 0xc9a227, roughness: 0.35, metalness: 0.8 })
+  );
+  ring.position.y = 0.92;
+  ring.rotation.z = Math.PI / 2 + 0.41;
+  globeSphere = new THREE.Mesh(
+    new THREE.SphereGeometry(0.3, 32, 24),
+    new THREE.MeshStandardMaterial({
+      map: tex, roughness: 0.65, emissive: 0x223a66, emissiveIntensity: 0.22,
+    })
+  );
+  globeSphere.position.y = 0.92;
+  globeSphere.rotation.z = 0.41;
+  globeSphere.castShadow = true;
+  globeGroup.add(base, stem, ring, globeSphere);
+  globeGroup.position.set(-6.0, 0, -2.6);
+  scene.add(globeGroup);
+})();
+
+function openSecretModal() {
+  if (!secretModal) return;
+  secretModal.classList.add('on');
+  smErr.style.display = 'none';
+  smPass.value = '';
+  setTimeout(() => smPass.focus(), 50);
+}
+
+async function trySecret() {
+  const val = smPass.value || '';
+  // PBKDF2 (210k iterations): the password never ships in the repo, and the
+  // public verifier is expensive to brute-force
+  const enc = new TextEncoder();
+  const km = await crypto.subtle.importKey('raw', enc.encode(val), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: enc.encode('ningshan-room-v1'), iterations: 210000, hash: 'SHA-256' },
+    km, 256);
+  const hex = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, '0')).join('');
+  if (hex === SECRET_HASH) {
+    sessionStorage.setItem('room-key', hex);
+    window.location.href = '/secret-room/';
+  } else {
+    smErr.style.display = 'block';
+    const card = secretModal.querySelector('.sm-card');
+    card.classList.remove('shake');
+    void card.offsetWidth;
+    card.classList.add('shake');
+    smPass.select();
+  }
+}
+
+if (smGo) smGo.addEventListener('click', trySecret);
+if (smPass) smPass.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') trySecret();
+  e.stopPropagation(); // typing in the field must not flip book pages
+});
+if (secretModal) secretModal.addEventListener('pointerup', (e) => {
+  if (e.target === secretModal) secretModal.classList.remove('on');
+});
 
 // ---------- floating post cards ----------
 const cardsGroup = new THREE.Group();
@@ -354,6 +457,13 @@ function galleryOf(post) {
 }
 
 const MUSIC_META = {}; // shortcode -> {title, artist, file} (local preview excerpts)
+const MUSIC_TIMES = {}; // shortcode -> {start_ms, duration_ms} — the segment IG uses
+
+function igStartFor(post) {
+  const sc = shortcodeOf(post);
+  const t = sc && MUSIC_TIMES[sc];
+  return t && t.start_ms ? t.start_ms / 1000 : 0;
+}
 
 function musicFor(post) {
   const sc = shortcodeOf(post);
@@ -420,12 +530,12 @@ function resolvePreview(q) {
   return chain;
 }
 
-function playMusicQuery(q, gen) {
+function playMusicQuery(q, gen, igStartSec) {
   const hit = previewCache.get(q);
   if (hit) {
     if (hit.url) {
       playMusic(hit.url);
-      showMusicBar(hit.name || q, hit.artist);
+      showMusicBar(hit.name || q, hit.artist, igStartSec);
     }
     return;
   }
@@ -434,7 +544,7 @@ function playMusicQuery(q, gen) {
     previewCache.set(q, meta || { url: null });
     if (meta && meta.url && viewerState.active && gen === viewerGen) {
       playMusic(meta.url);
-      showMusicBar(meta.name || q, meta.artist);
+      showMusicBar(meta.name || q, meta.artist, igStartSec);
     }
   });
 }
@@ -548,15 +658,19 @@ music.preload = 'none';
 let musicVol = 0, musicTarget = 0, musicStopTimer = 0;
 const SNIPPET_SECONDS = 25;
 
-function playMusic(src) {
+function playMusic(src, startSec) {
   clearTimeout(musicStopTimer);
   const abs = new URL(src, window.location.origin).href;
+  const seekTo = startSec || 0;
+  const doSeek = () => { try { music.currentTime = seekTo; } catch (e) { /* not seekable yet */ } };
   if (music.src !== abs) {
     music.src = src;
     musicVol = 0;          // fresh fade-in for a new song
     music.volume = 0;
+    music.onloadedmetadata = doSeek; // full songs jump to the IG segment
+  } else {
+    doSeek();
   }
-  try { music.currentTime = 0; } catch (e) { /* not seekable yet */ }
   musicTarget = 1;
   const p = music.play();
   if (p && p.catch) p.catch(() => { /* autoplay refused — stay silent */ });
@@ -574,11 +688,17 @@ function stopMusic(immediate) {
   }
 }
 
-// the now-playing bar: song, artist, and a YouTube link
-function showMusicBar(name, artist) {
+// the now-playing bar: song, artist, IG segment timestamp, and a YouTube link
+function showMusicBar(name, artist, igStartSec) {
   if (!musicBar || !name) return;
   mbTitle.textContent = name;
-  mbArtist.textContent = artist || '';
+  let sub = artist || '';
+  if (igStartSec > 0) {
+    const mm = Math.floor(igStartSec / 60);
+    const ss = String(Math.floor(igStartSec % 60)).padStart(2, '0');
+    sub += (sub ? ' · ' : '') + 'on IG from ' + mm + ':' + ss;
+  }
+  mbArtist.textContent = sub;
   mbYt.href = 'https://www.youtube.com/results?search_query=' +
     encodeURIComponent((name + ' ' + (artist || '')).trim());
   musicBar.classList.add('on');
@@ -595,6 +715,7 @@ fetch('/room-posts.json?t=' + Math.floor(Date.now() / 600000))
     Object.assign(MUSIC_QUERIES, data.music || {});
     Object.assign(MUSIC_META, data.musicMeta || {});
     Object.assign(POST_CAPTIONS, data.captions || {});
+    Object.assign(MUSIC_TIMES, data.musicTimes || {});
     buildGalleryMap(data.gallery || []);
     // newest first; every post hangs on a wall (zone capacity >= post count)
     posts.sort((a, b) => (b.ts || 0) - (a.ts || 0));
@@ -688,6 +809,17 @@ renderer.domElement.addEventListener('pointermove', (e) => {
     }
     return;
   }
+  if (raycaster.intersectObject(globeGroup, true).length) {
+    if (hovered) { hovered.targetScale = hovered.baseScale; hovered = null; }
+    renderer.domElement.style.cursor = 'pointer';
+    if (tip) {
+      tip.style.display = 'block';
+      tip.style.left = (e.clientX + 14) + 'px';
+      tip.style.top = (e.clientY + 14) + 'px';
+      tip.innerHTML = '<strong>a small spinning world</strong>';
+    }
+    return;
+  }
   const card = pickCard(e.clientX, e.clientY);
   if (card !== hovered) {
     if (hovered) hovered.targetScale = hovered.baseScale;
@@ -738,6 +870,10 @@ renderer.domElement.addEventListener('pointerup', (e) => {
   raycaster.setFromCamera(pointer, camera);
   if (raycaster.intersectObject(musicSign, true).length) {
     window.location.href = '/music-room/';
+    return;
+  }
+  if (raycaster.intersectObject(globeGroup, true).length) {
+    openSecretModal();
     return;
   }
   const card = pickCard(e.clientX, e.clientY);
@@ -1060,13 +1196,17 @@ const csDate = document.getElementById('cs-date');
 function drawViewerCaption(post) {
   const caption = fullCaptionOf(post);
   const hasMusic = hasTuneFor(post);
-  if (IS_TOUCH && captionSheet) {
+  // phones always use the scrollable sheet; desktop switches to it for long
+  // captions too — a shrunken 3D panel can't scroll
+  const LONG = !!caption && caption.length > 420;
+  if ((IS_TOUCH || LONG) && captionSheet) {
     captionVisible = false;
     csText.textContent = caption || '';
     csDate.textContent = post.date || '';
     captionSheet.classList.add('on');
     return;
   }
+  if (captionSheet) captionSheet.classList.remove('on');
   captionVisible = true;
   // high-resolution panel so long captions read crisply
   const W = 960, pad = 50;
@@ -1267,10 +1407,12 @@ function viewerShow(i) {
     const tune = musicFor(card.post);
     const q = tune ? null : musicQueryFor(card.post);
     if (tune) {
-      playMusic(tune);
+      const isFull = AUDIO_SHORTCODES.has(shortcodeOf(card.post));
+      const st = igStartFor(card.post);
+      playMusic(tune, isFull ? st : 0); // only full songs can seek to the IG segment
       const lbl = musicLabelFor(card.post);
-      if (lbl) showMusicBar(lbl.name, lbl.artist);
-    } else { stopMusic(false); if (q) playMusicQuery(q, gen); }
+      if (lbl) showMusicBar(lbl.name, lbl.artist, st);
+    } else { stopMusic(false); if (q) playMusicQuery(q, gen, igStartFor(card.post)); }
     vid.pause();
     viewerItems = [];
     for (const comp of companions) { comp.active = false; comp.group.visible = false; }
@@ -1288,10 +1430,12 @@ function viewerShow(i) {
   const opensWithVideo = viewerItems[0] && viewerItems[0].video;
   if (opensWithVideo) stopMusic(false);
   else if (tune) {
-    playMusic(tune);
+    const isFull = AUDIO_SHORTCODES.has(shortcodeOf(card.post));
+    const st = igStartFor(card.post);
+    playMusic(tune, isFull ? st : 0);
     const lbl = musicLabelFor(card.post);
-    if (lbl) showMusicBar(lbl.name, lbl.artist);
-  } else { stopMusic(false); if (q) playMusicQuery(q, gen); }
+    if (lbl) showMusicBar(lbl.name, lbl.artist, st);
+  } else { stopMusic(false); if (q) playMusicQuery(q, gen, igStartFor(card.post)); }
   const thumb = card.loaded && card.photoMesh.material.map ? card.photoMesh.material.map : placeholderTex;
   setViewerTexture(thumb, card.loaded ? (card.aspect || 1) : 1);
   renderViewerSlots(gen);
@@ -1347,6 +1491,7 @@ function animate() {
 
   controls.update();
   for (const fn of updatables) fn(t, dt);
+  if (globeSphere) globeSphere.rotation.y += dt * 0.25;
 
   for (let i = 0; i < cards.length; i++) {
     const card = cards[i];

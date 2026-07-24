@@ -7,6 +7,7 @@ permalink: /room-posts.json
 "music": {% if site.data.post_music %}{{ site.data.post_music | jsonify }}{% else %}null{% endif %},
 "musicMeta": {% if site.data.post_music_meta %}{{ site.data.post_music_meta | jsonify }}{% else %}null{% endif %},
 "captions": {% if site.data.post_captions %}{{ site.data.post_captions | jsonify }}{% else %}null{% endif %},
+"musicTimes": {% if site.data.post_music_times %}{{ site.data.post_music_times | jsonify }}{% else %}null{% endif %},
 "gallery": [{% for f in igs %}{{ f.path | jsonify }}{% unless forloop.last %},{% endunless %}{% endfor %}],
 "posts": [
 {% for post in site.posts %}  {"title": {{ post.title | jsonify }}, "url": {{ post.url | jsonify }}, "date": {{ post.date | date: "%b %-d, %Y" | jsonify }}, "ts": {{ post.date | date: "%s" }}, "image": {{ post.image | jsonify }}, "tags": {{ post.tags | jsonify }}, "excerpt": {{ post.excerpt | strip_html | strip_newlines | truncate: 420 | jsonify }}, "body": {{ post.content | strip_html | jsonify }}}{% unless forloop.last %},{% endunless %}

@@ -65,15 +65,35 @@ layout: null
       #music-bar strong, #music-bar em { max-width: 150px; }
     }
 
-    /* phone caption: crisp scrollable HTML instead of tiny 3D text */
+    /* scrollable caption sheet: always on phones, on desktop for long text */
     #caption-sheet { position: fixed; z-index: 26; left: 0; right: 0; bottom: 0; display: none;
-      max-height: 34vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
-      padding: 14px 18px calc(52px + env(safe-area-inset-bottom));
-      background: linear-gradient(to top, rgba(16,9,4,.96) 65%, rgba(16,9,4,0));
+      max-height: 38vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
+      padding: 16px 18px calc(56px + env(safe-area-inset-bottom));
+      background: linear-gradient(to top, rgba(16,9,4,.96) 70%, rgba(16,9,4,0));
       border-top: 1px solid rgba(255,217,160,.25); }
     #caption-sheet.on { display: block; }
-    #caption-sheet p { font-size: 14px; line-height: 1.55; color: #ffe6bd; white-space: pre-wrap; margin: 0 0 6px; }
-    #caption-sheet span { font-size: 11.5px; color: #c9a97f; }
+    #caption-sheet p { font-size: 14.5px; line-height: 1.6; color: #ffe6bd; white-space: pre-wrap;
+      margin: 0 auto 8px; max-width: 660px; }
+    #caption-sheet span { display: block; font-size: 11.5px; color: #c9a97f; max-width: 660px; margin: 0 auto; }
+
+    /* the globe's password gate */
+    #secret-modal { position: fixed; inset: 0; z-index: 50; display: none;
+      align-items: center; justify-content: center; background: rgba(8,5,2,.72);
+      -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+    #secret-modal.on { display: flex; }
+    .sm-card { background: #1c1208; border: 1px solid rgba(255,217,160,.45); border-radius: 16px;
+      padding: 28px 30px; text-align: center; max-width: 320px; box-shadow: 0 20px 70px rgba(0,0,0,.6); }
+    .sm-card h2 { font-family: 'Darker Grotesque', sans-serif; font-size: 30px; color: #ffe6bd; }
+    .sm-card p { font-size: 13px; color: #c9a97f; margin: 4px 0 16px; }
+    .sm-card input { width: 100%; padding: 10px 14px; border-radius: 10px; font-size: 15px;
+      border: 1px solid rgba(255,217,160,.4); background: #0f0a05; color: #ffe6bd; outline: none; }
+    .sm-card input:focus { border-color: rgba(255,217,160,.8); }
+    .sm-card button { margin-top: 12px; width: 100%; padding: 10px; border-radius: 999px; border: none;
+      background: #c9923a; color: #241505; font-weight: 700; font-size: 14px; cursor: pointer; }
+    .sm-card button:hover { background: #e0a848; }
+    #sm-err { display: none; margin-top: 10px; font-size: 12.5px; color: #e08a7a; }
+    .sm-card.shake { animation: smshake .4s; }
+    @keyframes smshake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
 
     #card-tip { position: fixed; z-index: 40; display: none; pointer-events: none; max-width: 300px;
       background: rgba(22,12,5,.92); border: 1px solid rgba(255,217,160,.4); border-radius: 10px;
@@ -122,6 +142,15 @@ layout: null
   </div>
   <div id="card-tip"></div>
   <div id="caption-sheet"><p id="cs-text"></p><span id="cs-date"></span></div>
+  <div id="secret-modal">
+    <div class="sm-card">
+      <h2>the globe hums quietly</h2>
+      <p>whisper the word and it will open</p>
+      <input id="sm-pass" type="password" autocomplete="off" placeholder="password">
+      <button id="sm-go">enter</button>
+      <span id="sm-err">that's not it…</span>
+    </div>
+  </div>
 
   <script type="importmap">
   {
@@ -131,7 +160,7 @@ layout: null
     }
   }
   </script>
-  <script type="module" src="/js/room/main.js?v=9"></script>
+  <script type="module" src="/js/room/main.js?v=10"></script>
   <script>
     // If the module (three.js CDN, import maps, old browser) never boots,
     // don't strand the visitor on the loading screen.

@@ -2,8 +2,8 @@
 // of performance videos (@otonoori). Completely different mood from the tatami room.
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { buildDrums } from './drums.js?v=9';
-import { buildGuitar } from './guitar.js?v=9';
+import { buildDrums } from './drums.js?v=10';
+import { buildGuitar } from './guitar.js?v=10';
 
 const canvasHost = document.getElementById('room-canvas');
 const overlay = document.getElementById('room-loading');
@@ -29,9 +29,9 @@ try {
   }
   throw e;
 }
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, IS_TOUCH ? 1.5 : 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = true;
+renderer.shadowMap.enabled = !IS_TOUCH; // phones skip shadows for smoothness
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.14;
@@ -89,7 +89,7 @@ scene.add(moonlight, moonlight.target);
 const updatables = [];
 let exitDoor = null;
 
-import('./stage.js?v=9').then(m => {
+import('./stage.js?v=10').then(m => {
   const stage = m.buildStage(THREE);
   scene.add(stage);
   if (stage.userData && typeof stage.userData.update === 'function') updatables.push(stage.userData.update);
