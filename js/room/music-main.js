@@ -219,31 +219,66 @@ for (let r = 0; r < WALL.rows; r++) {
   }
 }
 
-// paging buttons — big labeled pills at the wall's sides, impossible to miss
+// paging buttons — little guitar amps flanking the stage; the glowing
+// arrow on each grille pages the video wall
 function arrowMesh(dir) {
   const c = document.createElement('canvas');
-  c.width = 320; c.height = 140;
+  c.width = 360; c.height = 400;
   const g = c.getContext('2d');
-  const r = 54;
-  g.fillStyle = 'rgba(255,244,232,0.97)';
-  g.strokeStyle = 'rgba(255,138,196,0.95)';
-  g.lineWidth = 10;
+  // tolex body with cream piping
+  g.fillStyle = '#382c26';
+  g.beginPath(); g.roundRect(6, 6, 348, 388, 26); g.fill();
+  g.strokeStyle = '#e8dcc8';
+  g.lineWidth = 7;
+  g.beginPath(); g.roundRect(14, 14, 332, 372, 20); g.stroke();
+  // control panel: three knobs and a tiny jewel lamp
+  g.fillStyle = '#e8dcc8';
+  g.beginPath(); g.roundRect(26, 26, 308, 66, 12); g.fill();
+  for (let k = 0; k < 3; k++) {
+    const kx = 70 + k * 78;
+    g.fillStyle = '#42342c';
+    g.beginPath(); g.arc(kx, 59, 20, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = '#e8dcc8';
+    g.lineWidth = 4;
+    g.beginPath(); g.moveTo(kx, 59); g.lineTo(kx + 12, 47); g.stroke();
+  }
+  g.fillStyle = '#ff8ac4';
+  g.beginPath(); g.arc(312, 59, 9, 0, Math.PI * 2); g.fill();
+  // woven grille
+  g.fillStyle = '#241d16';
+  g.beginPath(); g.roundRect(30, 108, 300, 244, 14); g.fill();
+  g.save();
+  g.beginPath(); g.roundRect(30, 108, 300, 244, 14); g.clip();
+  g.strokeStyle = 'rgba(196,164,120,0.35)';
+  g.lineWidth = 3;
+  for (let i = -20; i < 24; i++) {
+    g.beginPath(); g.moveTo(30 + i * 16, 108); g.lineTo(30 + i * 16 + 122, 352); g.stroke();
+    g.beginPath(); g.moveTo(30 + i * 16, 352); g.lineTo(30 + i * 16 + 122, 108); g.stroke();
+  }
+  g.restore();
+  // glowing arrow on the grille
+  g.shadowColor = '#ff8ac4';
+  g.shadowBlur = 26;
+  g.fillStyle = '#ffd9ec';
   g.beginPath();
-  g.roundRect(8, 8, 304, 124, r);
+  if (dir > 0) { g.moveTo(140, 160); g.lineTo(248, 230); g.lineTo(140, 300); }
+  else { g.moveTo(220, 160); g.lineTo(112, 230); g.lineTo(220, 300); }
+  g.closePath();
   g.fill();
-  g.stroke();
-  g.fillStyle = '#4a3040';
-  g.font = '700 52px system-ui, sans-serif';
+  g.shadowBlur = 0;
+  // label plate
+  g.fillStyle = '#e8dcc8';
+  g.font = '700 34px Georgia, serif';
   g.textAlign = 'center';
-  g.textBaseline = 'middle';
-  g.fillText(dir > 0 ? 'next ▸' : '◂ back', 160, 74);
+  g.fillText(dir > 0 ? 'next' : 'back', 180, 382);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   const m = new THREE.Mesh(
-    new THREE.PlaneGeometry(1.25, 0.55),
+    new THREE.PlaneGeometry(0.82, 0.91),
     new THREE.MeshBasicMaterial({ map: tex, transparent: true })
   );
-  m.position.set(dir > 0 ? 4.25 : -4.25, 2.9, WALL.z + 0.03);
+  m.position.set(dir > 0 ? 4.2 : -4.2, 0.76, WALL.z + 0.5);
+  m.rotation.y = dir > 0 ? -0.14 : 0.14;
   m.userData.pageDir = dir;
   m.visible = false;
   scene.add(m);
@@ -261,7 +296,7 @@ const pageLabel = new THREE.Mesh(
   new THREE.PlaneGeometry(1.15, 0.35),
   new THREE.MeshBasicMaterial({ map: pageTex, transparent: true })
 );
-pageLabel.position.set(4.25, 3.5, WALL.z + 0.03);
+pageLabel.position.set(4.2, 1.52, WALL.z + 0.5);
 pageLabel.visible = false;
 scene.add(pageLabel);
 function drawPageLabel(cur, max) {
