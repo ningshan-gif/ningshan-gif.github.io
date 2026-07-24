@@ -353,7 +353,21 @@ function playerOpen(globalIndex) {
   if (!v) return;
   playerState.active = true;
   playerState.index = globalIndex;
+  // show the poster immediately — a black rectangle while a reel buffers on
+  // cellular reads as "not playing"
+  const slot = globalIndex - page * PER_PAGE;
+  const posterMap = slot >= 0 && slot < screens.length && screens[slot].loaded
+    ? screens[slot].mesh.material.map : null;
+  playerMat.map = posterMap || videoTex;
+  playerMat.needsUpdate = true;
+  vid.onplaying = () => {
+    if (playerState.active && playerState.index === globalIndex) {
+      playerMat.map = videoTex;
+      playerMat.needsUpdate = true;
+    }
+  };
   vid.src = v.video;
+  vid.preload = 'auto';
   vid.muted = false;
   vid.volume = 0.95;
   vid.onloadedmetadata = playerFit;
