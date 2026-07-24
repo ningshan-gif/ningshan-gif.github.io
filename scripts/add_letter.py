@@ -31,9 +31,13 @@ def main():
     with open(BIN, "rb") as f:
         blob = f.read()
     try:
-        letters = json.loads(aes.decrypt(blob[:12], blob[12:], None))
+        payload = json.loads(aes.decrypt(blob[:12], blob[12:], None))
     except Exception:
         sys.exit("wrong password, or letters.bin is corrupt — nothing changed")
+    # payload: {"greeting", "signature", "letters": [...]} (older bins were a bare list)
+    if isinstance(payload, list):
+        payload = {"letters": payload}
+    letters = payload.setdefault("letters", [])
 
     if sys.argv[1] == "--list":
         for L in letters:
@@ -42,7 +46,7 @@ def main():
 
     letters.append({"n": max((L.get("n", 0) for L in letters), default=0) + 1,
                     "text": sys.argv[1]})
-    data = json.dumps(letters, ensure_ascii=False).encode()
+    data = json.dumps(payload, ensure_ascii=False).encode()
     iv = secrets.token_bytes(12)
     with open(BIN, "wb") as f:
         f.write(iv + aes.encrypt(iv, data, None))

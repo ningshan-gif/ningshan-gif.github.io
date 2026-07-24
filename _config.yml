@@ -8,6 +8,12 @@ url: "https://ningshan-gif.github.io" # the base hostname & protocol for your si
 # Build Settings
 markdown: kramdown
 permalink: /:title
+exclude:
+  - scripts
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - node_modules
 plugins:
   - jekyll-paginate
   - jekyll-sitemap

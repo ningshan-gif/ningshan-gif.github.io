@@ -1,4 +1,4 @@
-// The secret room — a starlit observatory holding a pocket universe:
+// The secret room — a starlit observatory:
 // encrypted photos orbiting a luminous earth, and a mailbox of letters.
 // Requires both the password verifier and the decryption key from the door.
 const KEY_HASH = 'b7814f71f1913760dfd032701c80d7a84e4ad1a91a741432ee491b9da863023d';
@@ -609,7 +609,14 @@ fetch('/secret-room.json?t=' + Math.floor(Date.now() / 600000))
     const lf = files.find(f => f.endsWith('letters.bin'));
     if (lf) {
       try {
-        letters = JSON.parse(new TextDecoder().decode(await decryptFile(lf)));
+        const payload = JSON.parse(new TextDecoder().decode(await decryptFile(lf)));
+        letters = Array.isArray(payload) ? payload : (payload.letters || []);
+        if (!Array.isArray(payload)) {
+          // the greeting and postmark live inside the ciphertext, never in the page
+          if (payload.greeting && hint) hint.textContent = payload.greeting;
+          const sig = document.getElementById('letter-sig');
+          if (payload.signature && sig) sig.textContent = payload.signature;
+        }
       } catch (e) { letters = []; }
     }
     await loadPhotos(files);
@@ -649,8 +656,6 @@ window.addEventListener('keydown', (e) => {
     else window.location.href = '/';
   }
 });
-
-if (hint) hint.textContent = 'welcome to our pocket universe (first try)';
 
 const clock = new THREE.Clock();
 const _fwd = new THREE.Vector3();
