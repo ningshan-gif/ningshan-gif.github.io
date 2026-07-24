@@ -365,20 +365,48 @@ function hasTuneFor(post) {
   return !!(musicFor(post) || musicQueryFor(post));
 }
 
+// Mobile browsers only allow audio started inside the tap itself. Preview URLs
+// arrive async, so we "prime" the element with a silent clip synchronously in
+// the gesture — once an element has played from a gesture, later src swaps
+// are allowed to play too.
+const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQQAAACAgICA';
+let musicPrimed = false;
+function primeMusic() {
+  if (musicPrimed) return;
+  try {
+    music.src = SILENT_WAV;
+    music.volume = 0;
+    const p = music.play();
+    if (p && p.then) p.then(() => { musicPrimed = true; }).catch(() => {});
+  } catch (e) { /* priming is best-effort */ }
+}
+
+// Chinese/Japanese tracks often only exist in the TW/JP iTunes stores.
+function resolvePreview(q) {
+  const hasCJK = /[぀-ヿ㐀-鿿]/.test(q);
+  const stores = hasCJK ? ['tw', 'jp', 'us'] : ['us', 'tw', 'jp'];
+  let chain = Promise.resolve(null);
+  for (const c of stores) {
+    chain = chain.then(url => url ||
+      fetch('https://itunes.apple.com/search?media=music&limit=1&country=' + c + '&term=' + encodeURIComponent(q))
+        .then(r => r.json())
+        .then(d => (d.results && d.results[0] && d.results[0].previewUrl) || null)
+        .catch(() => null));
+  }
+  return chain;
+}
+
 function playMusicQuery(q, gen) {
   const hit = previewCache.get(q);
   if (hit) {
     if (hit.url) playMusic(hit.url);
     return;
   }
-  fetch('https://itunes.apple.com/search?media=music&limit=1&term=' + encodeURIComponent(q))
-    .then(r => r.json())
-    .then(d => {
-      const url = (d.results && d.results[0] && d.results[0].previewUrl) || null;
-      previewCache.set(q, { url });
-      if (url && viewerState.active && gen === viewerGen) playMusic(url);
-    })
-    .catch(() => { /* stay quiet */ });
+  primeMusic(); // synchronously, while the tap still counts
+  resolvePreview(q).then(url => {
+    previewCache.set(q, { url });
+    if (url && viewerState.active && gen === viewerGen) playMusic(url);
+  });
 }
 
 function isWriting(post) {
@@ -474,7 +502,11 @@ const SNIPPET_SECONDS = 25;
 function playMusic(src) {
   clearTimeout(musicStopTimer);
   const abs = new URL(src, window.location.origin).href;
-  if (music.src !== abs) music.src = src;
+  if (music.src !== abs) {
+    music.src = src;
+    musicVol = 0;          // fresh fade-in for a new song
+    music.volume = 0;
+  }
   try { music.currentTime = 0; } catch (e) { /* not seekable yet */ }
   musicTarget = 1;
   const p = music.play();
@@ -1176,6 +1208,7 @@ function viewerShow(i) {
 }
 
 function viewerOpen(i) {
+  primeMusic(); // inside the click — keeps mobile happy for everything that follows
   viewerState.active = true;
   controls.enabled = false;
   if (hovered) { hovered.targetScale = hovered.baseScale; hovered = null; }
