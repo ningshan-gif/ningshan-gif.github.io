@@ -225,52 +225,95 @@ function arrowMesh(dir) {
   const c = document.createElement('canvas');
   c.width = 360; c.height = 400;
   const g = c.getContext('2d');
-  // tolex body with cream piping
-  g.fillStyle = '#382c26';
-  g.beginPath(); g.roundRect(6, 6, 348, 388, 26); g.fill();
-  g.strokeStyle = '#e8dcc8';
-  g.lineWidth = 7;
-  g.beginPath(); g.roundRect(14, 14, 332, 372, 20); g.stroke();
-  // control panel: three knobs and a tiny jewel lamp
-  g.fillStyle = '#e8dcc8';
-  g.beginPath(); g.roundRect(26, 26, 308, 66, 12); g.fill();
-  for (let k = 0; k < 3; k++) {
-    const kx = 70 + k * 78;
-    g.fillStyle = '#42342c';
-    g.beginPath(); g.arc(kx, 59, 20, 0, Math.PI * 2); g.fill();
-    g.strokeStyle = '#e8dcc8';
-    g.lineWidth = 4;
-    g.beginPath(); g.moveTo(kx, 59); g.lineTo(kx + 12, 47); g.stroke();
-  }
-  g.fillStyle = '#ff8ac4';
-  g.beginPath(); g.arc(312, 59, 9, 0, Math.PI * 2); g.fill();
-  // woven grille
-  g.fillStyle = '#241d16';
-  g.beginPath(); g.roundRect(30, 108, 300, 244, 14); g.fill();
+  // aged tweed body
+  g.fillStyle = '#c9ac7c';
+  g.beginPath(); g.roundRect(6, 6, 348, 388, 22); g.fill();
   g.save();
-  g.beginPath(); g.roundRect(30, 108, 300, 244, 14); g.clip();
-  g.strokeStyle = 'rgba(196,164,120,0.35)';
+  g.beginPath(); g.roundRect(6, 6, 348, 388, 22); g.clip();
+  g.lineWidth = 2;
+  for (let i = -30; i < 34; i++) {
+    g.strokeStyle = 'rgba(122,88,44,0.28)';
+    g.beginPath(); g.moveTo(i * 14, 0); g.lineTo(i * 14 + 200, 400); g.stroke();
+    g.strokeStyle = 'rgba(244,228,192,0.33)';
+    g.beginPath(); g.moveTo(i * 14 + 5, 0); g.lineTo(i * 14 + 205, 400); g.stroke();
+  }
+  // decades of corner grime
+  for (const [vx, vy] of [[6, 6], [354, 6], [6, 394], [354, 394]]) {
+    const v = g.createRadialGradient(vx, vy, 8, vx, vy, 130);
+    v.addColorStop(0, 'rgba(74,52,26,0.4)');
+    v.addColorStop(1, 'rgba(74,52,26,0)');
+    g.fillStyle = v;
+    g.fillRect(0, 0, 360, 400);
+  }
+  // scuffs
+  g.fillStyle = 'rgba(90,62,30,0.35)';
+  g.beginPath(); g.ellipse(70, 372, 26, 7, 0.3, 0, Math.PI * 2); g.fill();
+  g.beginPath(); g.ellipse(300, 30, 18, 6, -0.4, 0, Math.PI * 2); g.fill();
+  g.restore();
+  g.strokeStyle = '#7a5a34';
+  g.lineWidth = 8;
+  g.beginPath(); g.roundRect(10, 10, 340, 380, 18); g.stroke();
+  // dark control panel with chicken-head knobs and a ruby jewel lamp
+  g.fillStyle = '#32241c';
+  g.beginPath(); g.roundRect(28, 26, 304, 62, 8); g.fill();
+  g.strokeStyle = '#c9a24a';
   g.lineWidth = 3;
-  for (let i = -20; i < 24; i++) {
-    g.beginPath(); g.moveTo(30 + i * 16, 108); g.lineTo(30 + i * 16 + 122, 352); g.stroke();
-    g.beginPath(); g.moveTo(30 + i * 16, 352); g.lineTo(30 + i * 16 + 122, 108); g.stroke();
+  g.beginPath(); g.roundRect(28, 26, 304, 62, 8); g.stroke();
+  for (let k = 0; k < 3; k++) {
+    const kx = 78 + k * 72;
+    g.fillStyle = '#1c1410';
+    g.beginPath(); g.arc(kx, 57, 17, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#d9c49a';
+    g.save();
+    g.translate(kx, 57);
+    g.rotate(-0.6 + k * 0.5);
+    g.beginPath(); g.moveTo(-5, 4); g.lineTo(0, -15); g.lineTo(5, 4); g.closePath(); g.fill();
+    g.restore();
+  }
+  g.fillStyle = '#a83030';
+  g.beginPath(); g.arc(310, 57, 8, 0, Math.PI * 2); g.fill();
+  g.fillStyle = 'rgba(255,180,160,0.8)';
+  g.beginPath(); g.arc(308, 54, 3, 0, Math.PI * 2); g.fill();
+  // oxblood grille cloth with gold piping
+  g.fillStyle = '#46281f';
+  g.beginPath(); g.roundRect(34, 104, 292, 246, 10); g.fill();
+  g.save();
+  g.beginPath(); g.roundRect(34, 104, 292, 246, 10); g.clip();
+  g.lineWidth = 2;
+  for (let y = 104; y < 352; y += 7) {
+    g.strokeStyle = 'rgba(196,150,96,0.22)';
+    g.beginPath(); g.moveTo(34, y); g.lineTo(326, y); g.stroke();
+  }
+  for (let x = 34; x < 328; x += 7) {
+    g.strokeStyle = 'rgba(160,110,70,0.18)';
+    g.beginPath(); g.moveTo(x, 104); g.lineTo(x, 350); g.stroke();
   }
   g.restore();
-  // glowing arrow on the grille
-  g.shadowColor = '#ff8ac4';
-  g.shadowBlur = 26;
-  g.fillStyle = '#ffd9ec';
+  g.strokeStyle = '#c9a24a';
+  g.lineWidth = 5;
+  g.beginPath(); g.roundRect(34, 104, 292, 246, 10); g.stroke();
+  // aged brass arrow
+  g.shadowColor = 'rgba(232,196,120,0.9)';
+  g.shadowBlur = 18;
+  g.fillStyle = '#e8cc88';
+  g.strokeStyle = '#8a6a34';
+  g.lineWidth = 5;
   g.beginPath();
-  if (dir > 0) { g.moveTo(140, 160); g.lineTo(248, 230); g.lineTo(140, 300); }
-  else { g.moveTo(220, 160); g.lineTo(112, 230); g.lineTo(220, 300); }
+  if (dir > 0) { g.moveTo(140, 165); g.lineTo(244, 227); g.lineTo(140, 289); }
+  else { g.moveTo(220, 165); g.lineTo(116, 227); g.lineTo(220, 289); }
   g.closePath();
   g.fill();
   g.shadowBlur = 0;
-  // label plate
-  g.fillStyle = '#e8dcc8';
-  g.font = '700 34px Georgia, serif';
+  g.stroke();
+  // gold script plate, slightly askew like an old badge
+  g.save();
+  g.translate(180, 372);
+  g.rotate(-0.03);
+  g.fillStyle = '#8a6a34';
+  g.font = 'italic 700 36px Georgia, "Times New Roman", serif';
   g.textAlign = 'center';
-  g.fillText(dir > 0 ? 'next' : 'back', 180, 382);
+  g.fillText(dir > 0 ? 'next' : 'back', 0, 10);
+  g.restore();
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   const m = new THREE.Mesh(
@@ -548,10 +591,6 @@ function animate() {
   for (const fn of updatables) fn(t, dt);
   // ember flicker
   fireGlow.intensity = 14 + Math.sin(t * 9.1) * 1.6 + Math.sin(t * 23.7) * 0.9;
-  // pager buttons breathe so they catch the eye
-  const pulse = 1 + Math.sin(t * 2.6) * 0.06;
-  if (nextArrow.visible) nextArrow.scale.setScalar(pulse);
-  if (prevArrow.visible) prevArrow.scale.setScalar(pulse);
 
   // dream-light: motes rise and sway, wisps drift on slow orbits
   if (!REDUCED_MOTION) {
