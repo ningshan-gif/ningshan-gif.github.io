@@ -219,24 +219,31 @@ for (let r = 0; r < WALL.rows; r++) {
   }
 }
 
-// paging arrows (only shown when needed)
+// paging buttons — big labeled pills at the wall's sides, impossible to miss
 function arrowMesh(dir) {
   const c = document.createElement('canvas');
-  c.width = c.height = 128;
+  c.width = 320; c.height = 140;
   const g = c.getContext('2d');
-  g.fillStyle = 'rgba(255,138,196,0.9)';
+  const r = 54;
+  g.fillStyle = 'rgba(255,244,232,0.97)';
+  g.strokeStyle = 'rgba(255,138,196,0.95)';
+  g.lineWidth = 10;
   g.beginPath();
-  if (dir > 0) { g.moveTo(38, 24); g.lineTo(96, 64); g.lineTo(38, 104); }
-  else { g.moveTo(90, 24); g.lineTo(32, 64); g.lineTo(90, 104); }
-  g.closePath();
+  g.roundRect(8, 8, 304, 124, r);
   g.fill();
+  g.stroke();
+  g.fillStyle = '#4a3040';
+  g.font = '700 52px system-ui, sans-serif';
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  g.fillText(dir > 0 ? 'next ▸' : '◂ back', 160, 74);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   const m = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.5, 0.5),
+    new THREE.PlaneGeometry(1.25, 0.55),
     new THREE.MeshBasicMaterial({ map: tex, transparent: true })
   );
-  m.position.set(dir > 0 ? 4.05 : -4.05, 3.0, WALL.z + 0.02);
+  m.position.set(dir > 0 ? 4.25 : -4.25, 2.9, WALL.z + 0.03);
   m.userData.pageDir = dir;
   m.visible = false;
   scene.add(m);
@@ -244,6 +251,33 @@ function arrowMesh(dir) {
 }
 const nextArrow = arrowMesh(1);
 const prevArrow = arrowMesh(-1);
+
+// "page 2 / 5" pill floating above the wall
+const pageCanvas = document.createElement('canvas');
+pageCanvas.width = 360; pageCanvas.height = 110;
+const pageTex = new THREE.CanvasTexture(pageCanvas);
+pageTex.colorSpace = THREE.SRGBColorSpace;
+const pageLabel = new THREE.Mesh(
+  new THREE.PlaneGeometry(1.15, 0.35),
+  new THREE.MeshBasicMaterial({ map: pageTex, transparent: true })
+);
+pageLabel.position.set(4.25, 3.5, WALL.z + 0.03);
+pageLabel.visible = false;
+scene.add(pageLabel);
+function drawPageLabel(cur, max) {
+  const g = pageCanvas.getContext('2d');
+  g.clearRect(0, 0, 360, 110);
+  g.fillStyle = 'rgba(20,26,34,0.78)';
+  g.beginPath();
+  g.roundRect(4, 4, 352, 102, 51);
+  g.fill();
+  g.fillStyle = '#ffd9ec';
+  g.font = '600 46px system-ui, sans-serif';
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  g.fillText(`page ${cur + 1} / ${max + 1}`, 180, 58);
+  pageTex.needsUpdate = true;
+}
 
 let videos = [];  // {code, caption, video, poster}
 let page = 0;
@@ -276,6 +310,8 @@ function applyPage() {
   page = Math.min(Math.max(0, page), maxPage);
   nextArrow.visible = page < maxPage;
   prevArrow.visible = page > 0;
+  pageLabel.visible = maxPage > 0;
+  if (maxPage > 0) drawPageLabel(page, maxPage);
   for (let i = 0; i < screens.length; i++) {
     const s = screens[i];
     const v = videos[page * PER_PAGE + i] || null;
@@ -477,6 +513,10 @@ function animate() {
   for (const fn of updatables) fn(t, dt);
   // ember flicker
   fireGlow.intensity = 14 + Math.sin(t * 9.1) * 1.6 + Math.sin(t * 23.7) * 0.9;
+  // pager buttons breathe so they catch the eye
+  const pulse = 1 + Math.sin(t * 2.6) * 0.06;
+  if (nextArrow.visible) nextArrow.scale.setScalar(pulse);
+  if (prevArrow.visible) prevArrow.scale.setScalar(pulse);
 
   // dream-light: motes rise and sway, wisps drift on slow orbits
   if (!REDUCED_MOTION) {
