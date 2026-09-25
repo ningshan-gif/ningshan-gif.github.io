@@ -428,6 +428,8 @@ function loadPoster(s, src) {
 
 // ---------- the player: one big screen floating over the stage ----------
 const vid = document.createElement('video');
+// GitHub serves the archive with CORS headers so it can be used as a WebGL texture.
+vid.crossOrigin = 'anonymous';
 vid.playsInline = true;
 vid.loop = true;
 vid.preload = 'metadata';
