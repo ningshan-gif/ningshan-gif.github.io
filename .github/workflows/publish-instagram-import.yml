@@ -13,6 +13,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Download and verify prepared media
         run: python3 .publish-instagram/fetch.py
       - name: Publish the complete verified tree
