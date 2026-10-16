@@ -2,6 +2,8 @@
 # General Site Settings
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://ningshan-gif.github.io" # the base hostname & protocol for your site
+# Keep full-quality performance videos in GitHub without exceeding Pages' 1 GB limit.
+music_video_baseurl: "https://raw.githubusercontent.com/ningshan-gif/ningshan-gif.github.io/main/images/otonoori"
 
 
 #-------------------------------
@@ -9,6 +11,7 @@ url: "https://ningshan-gif.github.io" # the base hostname & protocol for your si
 markdown: kramdown
 permalink: /:title
 exclude:
+  - "images/otonoori/*.mp4"
   - scripts
   - Gemfile
   - Gemfile.lock
